@@ -20,11 +20,11 @@
 
 	| Device Option | Target Device |
 	| --------- | -------- |
-	| <code>CPU_FP32</code> | Intel<sup>®</sup> CPUs |
-	| <code>GPU_FP32</code> |Intel<sup>®</sup> Integrated Graphics |
-	| <code>GPU_FP16</code> | Intel<sup>®</sup> Integrated Graphics |
-	| <code>MYRIAD_FP16</code> | Intel<sup>®</sup> Movidius<sup>TM</sup> USB sticks |
-	| <code>VAD-R_FP16</code> | Intel<sup>®</sup> Vision Accelerator Design based on Movidius<sup>TM</sup> MyriadX VPUs |
+	| <code>CPU_FP32</code> | Intel<sup>Â®</sup> CPUs |
+	| <code>GPU_FP32</code> |Intel<sup>Â®</sup> Integrated Graphics |
+	| <code>GPU_FP16</code> | Intel<sup>Â®</sup> Integrated Graphics |
+	| <code>MYRIAD_FP16</code> | Intel<sup>Â®</sup> Movidius<sup>TM</sup> USB sticks |
+	| <code>VAD-R_FP16</code> | Intel<sup>Â®</sup> Vision Accelerator Design based on Movidius<sup>TM</sup> MyriadX VPUs |
 
 ## CPU Version 
 
@@ -90,9 +90,9 @@
 	|Environment Variables | Value |
 	| --------- | -------- |
 	| <code>MODEL_XML_PATH</code> | /opt/intel/dl/data/model.onnx |
-	| <code>CONNECTIONSTRING</code> |Intel<sup>®</sup> Integrated Graphics |
-	| <code>SCRIPTNAME</code> | /opt/intel/dl/data/<pythonscrit> |
-	| <code>INPUT</code> | /opt/intel/data/<image> |
+	| <code>CONNECTIONSTRING</code> |Azure Iot HUb connection string |
+	| <code>SCRIPTNAME</code> | /opt/intel/dl/data/pythonscrit |
+	| <code>INPUT</code> | /opt/intel/data/image |
 	
 
    - In the Container Create Options please replace as below
