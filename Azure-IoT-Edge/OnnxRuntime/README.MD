@@ -1,6 +1,6 @@
 # Quick-start Docker containers for ONNX Runtime OpenVino EP
 
-0. Prerequisites: Build openvino image.
+0. Prerequisites: Build openvino image with OpenVINO version 2018 R5.0.1.
    
 1. Retrieve your docker image in one of the following ways.
 
@@ -79,7 +79,7 @@
 
 ### Azure IOt Edge with ONNX Runtime-OpenvinoEP
 
-1 Deploy these image through Azure IOT Edge with the docker file Dockerfile.iot. The base image can be onnxruntime-cpu/gpu/vadr based on the accelerator selected. Please edit the Docker file to change base image name that was built for the accelerator.
+1 Deploy these image through [Azure IOT Edge](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux) with the docker file Dockerfile.iot. The base image can be onnxruntime-cpu/gpu/vadr based on the accelerator selected. Please edit the Docker file to change base image name that was built for the accelerator.
 
    - Build the docker image from the DockerFile in this repository.
      ``` 
@@ -91,7 +91,7 @@
 	| --------- | -------- |
 	| <code>MODEL_XML_PATH</code> | /opt/intel/dl/data/model.onnx |
 	| <code>CONNECTIONSTRING</code> |Azure Iot HUb connection string |
-	| <code>SCRIPTNAME</code> | /opt/intel/dl/data/pythonscrit |
+	| <code>SCRIPTNAME</code> | /opt/intel/dl/data/pythonscript |
 	| <code>INPUT</code> | /opt/intel/data/image |
 	
 
@@ -135,5 +135,7 @@
 	 }
        ```
 	
+  ### ONNX Models
+  Pre trained ONNX Models for evaluation can be downloaded from the [ONNX Model Zoo](https://github.com/onnx/models).
 
 
