@@ -48,7 +48,7 @@
 1. Retrieve your docker image in one of the following ways. 
    - Build the docker image from the DockerFile in this repository.
      ``` 
-      docker build -t onnxruntime-gpu --build-arg DEVICE=GPU_FP32 --network host . .
+      docker build -t onnxruntime-gpu --build-arg DEVICE=GPU_FP32 --network host . 
      ```
    - Pull the official image from DockerHub.
      ```
@@ -65,7 +65,7 @@
 1. Retrieve your docker image in one of the following ways. 
    - Build the docker image from the DockerFile in this repository.
      ``` 
-      docker build -t onnxruntime-vadr --build-arg DEVICE=VAD-R_FP16 --network host . .
+      docker build -t onnxruntime-vadr --build-arg DEVICE=VAD-R_FP16 --network host . 
      ```
    - Pull the official image from DockerHub.
      ```
@@ -83,7 +83,7 @@
 
    - Build the docker image from the DockerFile in this repository.
      ``` 
-      docker build -t onnx-iot --network host . .
+      docker build -t onnx-iot -f Dockerfile.iot --network host . 
      ```
 2. Provide the below configuration details while deploying the iot module on Azure portal. 
 
