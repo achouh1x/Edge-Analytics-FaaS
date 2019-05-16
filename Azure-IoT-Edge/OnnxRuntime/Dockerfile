@@ -31,15 +31,11 @@ FROM openvino:latest
 
 ARG DEVICE
 
-RUN wget "https://cmake.org/files/v3.13/cmake-3.13.3.tar.gz" && tar -xzvf cmake-3.13.3.tar.gz && cd cmake-3.13.3/ && ./bootstrap && make -j4 && make install
+RUN wget "https://cmake.org/files/v3.13/cmake-3.13.3.tar.gz" && tar -xzvf cmake-3.13.3.tar.gz && cd cmake-3.13.3/ && ./bootstrap && make -j4 && make install && rm -rf /cmake-3.13.3.tar.gz && rm -rf /cmake-3.13.3
 
-RUN rm -rf cmake-3.13.3.tar.gz
+RUN git clone --recursive https://github.com/intel/onnxruntime onnxruntime && cd onnxruntime && ./build.sh --config RelWithDebInfo --update --build --parallel --use_openvino $DEVICE --build_wheel && pip3 install /onnxruntime/build/Linux/RelWithDebInfo/dist/*-linux_x86_64.whl && rm -rf /onnxruntime
 
-RUN git clone --recursive https://github.com/intel/onnxruntime onnxruntime && cd onnxruntime && ./build.sh --config RelWithDebInfo --update --build --parallel --use_openvino $DEVICE --build_wheel
 
-RUN pip3 install /onnxruntime/build/Linux/RelWithDebInfo/dist/*-linux_x86_64.whl
-
-RUN rm -rf /onnxruntime
 
 
 
