@@ -29,8 +29,6 @@
 
 FROM ubuntu:16.04 
 
-
-
 ENV LD_LIBRARY_PATH=/usr/lib:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
 
 RUN apt update && \
@@ -44,6 +42,7 @@ RUN tar -xzf l_openvino_toolkit*.tgz && \
     cd l_openvino_toolkit* && \
     sed -i 's/decline/accept/g' silent.cfg && \
     ./install.sh -s silent.cfg && \
+    /bin/bash -c "source /opt/intel/computer_vision_sdk/bin/setupvars.sh" && \
     ./install_cv_sdk_dependencies.sh && \
     cd - && \
     rm -rf l_openvino_toolkit*
@@ -57,22 +56,7 @@ RUN wget https://github.com/intel/compute-runtime/releases/download/19.15.12831/
 
 RUN sudo dpkg -i *.deb
 
-#### Set env paths according to $INTEL_CVSDK_DIR/bin/setupvars.sh
-ENV INSTALLDIR=/opt/intel/computer_vision_sdk
-ENV INTEL_CVSDK_DIR=${INSTALLDIR}
-ENV LD_LIBRARY_PATH=${INSTALLDIR}/deployment_tools/model_optimizer/model_optimizer_caffe/bin:${LD_LIBRARY_PATH}
-ENV ModelOptimizer_ROOT_DIR=${INSTALLDIR}/deployment_tools/model_optimizer/model_optimizer_caffe
-ENV InferenceEngine_DIR=${INTEL_CVSDK_DIR}/deployment_tools/inference_engine/share
-ENV IE_PLUGINS_PATH=${INTEL_CVSDK_DIR}/deployment_tools/inference_engine/lib/ubuntu_16.04/intel64
-ENV LD_LIBRARY_PATH=/opt/intel/opencl:${INSTALLDIR}/deployment_tools/inference_engine/external/cldnn/lib:${INSTALLDIR}/inference_engine/external/gna/lib:${INSTALLDIR}/deployment_tools/inference_engine/external/mkltiny_lnx/lib:${INSTALLDIR}/deployment_tools/inference_engine/external/omp/lib:${IE_PLUGINS_PATH}:${LD_LIBRARY_PATH}
-ENV OpenCV_DIR=${INSTALLDIR}/opencv/share/OpenCV
-ENV LD_LIBRARY_PATH=${INSTALLDIR}/opencv/lib:${INSTALLDIR}/opencv/share/OpenCV/3rdparty/lib:${LD_LIBRARY_PATH}
-ENV PATH=${INTEL_CVSDK_DIR}/deployment_tools/model_optimizer:$PATH
-ENV PYTHONPATH=${INTEL_CVSDK_DIR}/deployment_tools/model_optimizer:$PYTHONPATH
-ENV PYTHONPATH=$INTEL_CVSDK_DIR/python/python3.5:${INTEL_CVSDK_DIR}/python/python3.5/ubuntu16:${PYTHONPATH}
-ENV HDDL_INSTALL_DIR=${INSTALLDIR}/deployment_tools/inference_engine/external/hddl
-ENV LD_LIBRARY_PATH=${INSTALLDIR}/deployment_tools/inference_engine/external/hddl/lib:$LD_LIBRARY_PATH
-
 RUN rm -rf *.deb
+
 
 
