@@ -34,9 +34,9 @@ FROM ubuntu:16.04
 ENV LD_LIBRARY_PATH=/usr/lib:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
 
 RUN apt update && \
-    apt -y install python3.5 python3-pip zip x11-apps lsb-core wget cpio sudo libboost-python-dev libpng-dev zlib1g-dev git libnuma1 ocl-icd-libopencl1 clinfo libboost-filesystem1.58.0 libboost-thread1.58.0
+    apt -y install python3.5 python3-pip zip x11-apps lsb-core wget cpio sudo libboost-python-dev libpng-dev zlib1g-dev git libnuma1 ocl-icd-libopencl1 clinfo libboost-filesystem1.58.0 libboost-thread1.58.0 protobuf-compiler libprotoc-dev
 
-RUN pip3 install numpy networkx onnx opencv-python
+RUN pip3 install numpy networkx opencv-python
 
 COPY l_openvino_*.tgz .
 RUN tar -xzf l_openvino_toolkit*.tgz && \
@@ -79,5 +79,8 @@ ARG DEVICE
 
 RUN wget "https://cmake.org/files/v3.13/cmake-3.13.3.tar.gz" && tar -xzvf cmake-3.13.3.tar.gz && cd cmake-3.13.3/ && ./bootstrap && make -j4 && make install && rm -rf /cmake-3.13.3.tar.gz && rm -rf /cmake-3.13.3
 
-RUN git clone --recursive https://github.com/intel/onnxruntime onnxruntime && cd onnxruntime && ./build.sh --config RelWithDebInfo --update --build --parallel --use_openvino $DEVICE --build_wheel && pip3 install /onnxruntime/build/Linux/RelWithDebInfo/dist/*-linux_x86_64.whl && rm -rf /onnxruntime
+RUN git clone --recursive https://github.com/intel/onnxruntime /onnxruntime && \
+    cd /onnxruntime/cmake/external/onnx && python3 setup.py install && \
+    cd /onnxruntime && ./build.sh --config RelWithDebInfo --update --build --parallel --use_openvino $DEVICE --build_wheel && \
+    pip3 install /onnxruntime/build/Linux/RelWithDebInfo/dist/*-linux_x86_64.whl && rm -rf /onnxruntime
 

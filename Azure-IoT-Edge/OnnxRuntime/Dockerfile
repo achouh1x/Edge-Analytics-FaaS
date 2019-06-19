@@ -27,7 +27,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-FROM openvino:latest 
+FROM openvino:latest
 
 ARG DEVICE
 
@@ -41,13 +41,12 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2
     tar -xf cmake-3.13.2-Linux-x86_64.tar.gz --strip 1 -C /opt/cmake
 
 RUN /bin/bash -c "source /opt/intel/computer_vision_sdk/bin/setupvars.sh" && \
-    git clone --recursive -b $branch https://github.com/intel/onnxruntime onnxruntime && cd onnxruntime && ./build.sh --config RelWithDebInfo --update --build --parallel --use_openvino $DEVICE --build_wheel && pip3 install /onnxruntime/build/Linux/RelWithDebInfo/dist/*-linux_x86_64.whl && rm -rf onnxruntime
+    git clone --recursive -b $branch https://github.com/intel/onnxruntime /onnxruntime && \
+    cd /onnxruntime/cmake/external/onnx && python3 setup.py install && \
+    cd /onnxruntime && ./build.sh --config RelWithDebInfo --update --build --parallel --use_openvino $DEVICE --build_wheel && pip3 install /onnxruntime/build/Linux/RelWithDebInfo/dist/*-linux_x86_64.whl
 
 RUN pip3 install pytest
 
 RUN locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
 
 ENV LANG en_US.UTF-8
-
-
-
