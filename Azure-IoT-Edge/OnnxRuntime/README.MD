@@ -1,10 +1,10 @@
 # Quick-start Docker containers for ONNX Runtime OpenVino EP
 
-0. Prerequisites: Build openvino image with OpenVINO version 2018 R5.0.1. Dockerfiles should be in same directory for base image and other images. 
+0. Prerequisites: Build openvino image with OpenVINO version 2018 R5.0.1. 
    
 1. Retrieve your base openVINO docker image as follows:
 
-    Build the openVINO docker image from the DockerFile in this repository. Before that, download from [here](https://software.intel.com/en-us/openvino-toolkit/choose-download) and copy the openvino tar file in the same directory and build the image
+    Build the openVINO docker image from the DockerFile in this repository. Before that, download OpenVINO version 2018 R5.0.1 from [here](https://software.intel.com/en-us/openvino-toolkit/choose-download) and copy the openvino tar file in the same directory and build the image
      ```
      # This docker image has all the openvino dependencies along with CPU, GPU and VAD-R drivers. This will be base image with name openvino
       docker build -t openvino -f Dockerfile.openvino .
@@ -60,7 +60,7 @@
 
    - Build the docker image from the DockerFile in this repository.
      ``` 
-      docker build -t onnx-iot -f Dockerfile.iot --network host . 
+      docker build -t onnx-iot -f Dockerfile.iot --build-arg MODEL_XML_PATH=<onnxmodel> --build-arg INPUT=<inputimage> --build-arg SCRIPTNAME=<scriptname> --build-arg CONNECTIONSTRING=<iotedgeconnectionstring> --network host . 
      ```
 2. Provide the below configuration details while deploying the iot module on Azure portal. 
 
