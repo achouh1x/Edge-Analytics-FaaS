@@ -31,7 +31,7 @@ FROM openvino:latest
 
 ARG DEVICE
 
-ARG branch=preview-v0.8
+ARG branch=preview-v0.8.1
 
 RUN mkdir -p /opt/cmake/bin
 
