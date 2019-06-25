@@ -43,10 +43,8 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2
 RUN /bin/bash -c "source /opt/intel/computer_vision_sdk/bin/setupvars.sh" && \
     git clone --recursive -b $branch https://github.com/intel/onnxruntime /onnxruntime && \
     cd /onnxruntime/cmake/external/onnx && python3 setup.py install && \
-    cd /onnxruntime && ./build.sh --config RelWithDebInfo --update --build --parallel --use_openvino $DEVICE --build_wheel && pip3 install /onnxruntime/build/Linux/RelWithDebInfo/dist/*-linux_x86_64.whl
+    cd /onnxruntime && ./build.sh --config RelWithDebInfo --update --build --parallel --use_openvino $DEVICE --build_wheel && pip3 install /onnxruntime/build/Linux/RelWithDebInfo/dist/*-linux_x86_64.whl && rm -rf /onnxruntime/build
 
-RUN pip3 install pytest
-
-RUN locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
+RUN pip3 install pytest && locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
 
 ENV LANG en_US.UTF-8
