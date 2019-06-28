@@ -1,0 +1,15 @@
+diff --git a/Tools/gsce b/Tools/gsce
+index e53c87a..69b8863 100755
+--- a/Tools/gsce
++++ b/Tools/gsce
+@@ -28,8 +28,8 @@ def gen_dockerfile( image_name, app_name, bin_name, proj_dir) :
+   df.write('    && pip install pycrypto \n')
+ 
+   df.write('# Temporal fixes for Dependencies Issue #1: libcrypto.so.1.0.0 and libssl.so.1.0.0 have different locations \n')
+-  df.write('RUN ln -s /usr/lib/x86_64-linux-gnu/libcrypto.so.1.0.0 /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 \\\n')
+-  df.write('    && ln -s /usr/lib/x86_64-linux-gnu/libssl.so.1.0.0 /lib/x86_64-linux-gnu/libssl.so.1.0.0 \n')
++  #df.write('RUN ln -s /usr/lib/x86_64-linux-gnu/libcrypto.so.1.0.0 /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 \\\n')
++  #df.write('    && ln -s /usr/lib/x86_64-linux-gnu/libssl.so.1.0.0 /lib/x86_64-linux-gnu/libssl.so.1.0.0 \n')
+ 
+   # SETUP Directory Structure
+   print "cwd: "+ proj_dir
