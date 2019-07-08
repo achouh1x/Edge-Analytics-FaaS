@@ -13,9 +13,9 @@
 2. Steps to build and run on different hardware/accelarator are provided below:  
       ### CPU Version 
 
-      1. Retrieve your docker image:
+      1. Retrieve your docker image: 
 
-         Build the docker image from the DockerFile in this repository. Providing the argument device enables onnxruntime for that particular device
+         Build the docker image from the DockerFile in this repository. Providing the argument device enables onnxruntime for that particular device. You can also provide arguments ONNXRUNTIME_REPO and ONNXRUNTIME_BRANCH to test that particular repo and branch. Default is https://github.com/intel/onnxruntime for repo and preview-v0.8.1 for branch
         
           ```
           docker build -t onnxruntime-cpu --build-arg DEVICE=CPU_FP32 --network host .
