@@ -6,15 +6,15 @@ The Intel(R) DAAL sample used in this case is available here
 
 ** Disclaimer: this is a pre-release beta version. Please do no use in production system before further assessment.
 ---
+To run this sample a system with SGX support is required, make sure that SGX is enabled in the BIOS before running this setup script.<br/>
+You can find the list of hardware/processors with SGX support [here](https://ark.intel.com/content/www/us/en/ark/search/featurefilter.html?productType=processors&SoftwareGuardExtensions=true) (official) and [here](https://github.com/ayeks/SGX-hardware#sgx-hardware-list) (unofficial)
+and info on how to check if SGX is supported & enabled on your system [here](https://software.intel.com/en-us/articles/properly-detecting-intel-software-guard-extensions-in-your-applications) (official) and [here](https://github.com/ayeks/SGX-hardware#test-sgx) (unofficial)<br/>
+The setup script will install all the pre-requisites such as SGX driver, SGX SDK, Graphene-SGX SDK, Docker-CE etc.<br/>
 
 #### Setup the environment<br/>
 * Open a terminal and clone this repository<br/>
 * cd to cloned git directory<br/>
 * ./setup.sh<br/>
-### *Note:*
-To run this sample a system with SGX enabled is required, make sure that SGX is enabled in the BIOS before running this setup script.<br/>
-The setup script will install the pre-requisites, SGX driver, SGX SDK and Graphene-SGX SDK, Docker-CE etc.<br/>
-
 
 #### Run SVM sample
 * $./run.sh < graphene installation directory > <br/>
