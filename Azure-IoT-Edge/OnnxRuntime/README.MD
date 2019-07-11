@@ -4,18 +4,20 @@
    
 1. Retrieve your base openVINO docker image as follows:
 
-    Build the openVINO docker image from the DockerFile in this repository. Before that, download OpenVINO online installer version 2018 R5.0.1 from [here](https://software.intel.com/en-us/openvino-toolkit/choose-download) and copy the openvino tar file in the same directory and build the image. The online installer size is only 16MB and the components needed for the accelerators are mentioned in the dockerfile.
+    Build the openVINO docker image from the DockerFile in this repository. Before that, download OpenVINO online installer version 2018 R5.0.1 from [here](https://software.intel.com/en-us/openvino-toolkit/choose-download) and copy the openvino tar file in the same directory and build the image. The online installer size is only 16MB and the components needed for the accelerators are mentioned in the dockerfile. 
      ```
      # This docker image has all the openvino dependencies along with CPU, GPU and VAD-R drivers. This will be base image with name openvino
       docker build -t openvino -f Dockerfile.openvino .
      ```
       
 2. Steps to build and run on different hardware/accelarator are provided below:  
+
+    Providing the argument device enables onnxruntime for that particular device. You can also provide arguments ONNXRUNTIME_REPO and ONNXRUNTIME_BRANCH to test that particular repo and branch. Default is https://github.com/intel/onnxruntime for repo and preview-v0.8.1 for branch
       ### CPU Version 
 
-      1. Retrieve your docker image: 
+      1. Build your docker image: 
 
-         Build the docker image from the DockerFile in this repository. Providing the argument device enables onnxruntime for that particular device. You can also provide arguments ONNXRUNTIME_REPO and ONNXRUNTIME_BRANCH to test that particular repo and branch. Default is https://github.com/intel/onnxruntime for repo and preview-v0.8.1 for branch
+         Build the docker image from the DockerFile in this repository. 
         
           ```
           docker build -t onnxruntime-cpu --build-arg DEVICE=CPU_FP32 --network host .
@@ -27,7 +29,7 @@
 
       ### GPU Version
 
-      1. Retrieve your docker image:
+      1. Build your docker image:
 
          Build the docker image from the DockerFile in this repository.
           ``` 
@@ -38,10 +40,21 @@
           ```
           docker run -it --device /dev/dri:/dev/dri onnxruntime-gpu:latest
           ```
+     ### Myriad VPU Accelerator Version 
 
+     1. Build the docker image from the DockerFile in this repository.
+        ``` 
+         docker build -t onnxruntime-myriad --build-arg DEVICE=MYRIAD_FP16 --network host . 
+        ```
+     2. Install the Myriad rules drivers on the host machine according to the reference in [here](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_linux.html#additional-NCS-steps)
+     3. Run the docker image by mounting the device drivers
+        ```
+        docker run -it --network host --privileged -v /dev:/dev  onnxruntime-myriad:latest
+
+        ```
       ### VAD-R Accelerator Version 
 
-      1. Retrieve your docker image: 
+      1. Build your docker image: 
       
          Build the docker image from the DockerFile in this repository.
          ``` 
