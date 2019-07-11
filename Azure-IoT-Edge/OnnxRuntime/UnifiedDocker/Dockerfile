@@ -81,6 +81,7 @@ ENV LANG en_US.UTF-8
 RUN wget https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2-Linux-x86_64.tar.gz && \
     tar -xf cmake-3.13.2-Linux-x86_64.tar.gz --strip 1 -C /opt/cmake && rm -rf /cmake-3.13.2-Linux-x86_64.tar.gz
 
+
 RUN /bin/bash -c "source /opt/intel/computer_vision_sdk/bin/setupvars.sh" && \
     git clone --recursive -b ${ONNXRUNTIME_BRANCH} ${ONNXRUNTIME_REPO} /onnxruntime && \
     cd /onnxruntime/cmake/external/onnx && python3 setup.py install && \
