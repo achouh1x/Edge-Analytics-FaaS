@@ -1,18 +1,18 @@
 # Quick-start Docker containers for ONNX Runtime OpenVino EP
 
-0. Prerequisites: Build openvino image with OpenVINO version 2018 R5.0.1. 
+0. Prerequisites: Build openvino image with OpenVINO version 2019 R1.1. 
    
 1. Retrieve your base openVINO docker image as follows:
 
-    Build the openVINO docker image from the DockerFile in this repository. Before that, download OpenVINO online installer version 2018 R5.0.1 from [here](https://software.intel.com/en-us/openvino-toolkit/choose-download) and copy the openvino tar file in the same directory and build the image. The online installer size is only 16MB and the components needed for the accelerators are mentioned in the dockerfile. 
+    Build the openVINO docker image from the DockerFile in this repository. Before that, download OpenVINO online installer version 2019 R1.1 from [here](https://software.intel.com/en-us/openvino-toolkit/choose-download) and copy the openvino tar file in the same directory and build the image. The online installer size is only 16MB and the components needed for the accelerators are mentioned in the dockerfile. 
      ```
      # This docker image has all the openvino dependencies along with CPU, GPU and VAD-R drivers. This will be base image with name openvino
-      docker build -t openvino -f Dockerfile.openvino .
+      docker build -t openvino -f Dockerfile.openvino --network host .
      ```
       
 2. Steps to build and run on different hardware/accelarator are provided below:  
 
-    Providing the argument device enables onnxruntime for that particular device. You can also provide arguments ONNXRUNTIME_REPO and ONNXRUNTIME_BRANCH to test that particular repo and branch. Default is https://github.com/intel/onnxruntime for repo and preview-v0.8.1 for branch
+    Providing the argument device enables onnxruntime for that particular device. You can also provide arguments ONNXRUNTIME_REPO and ONNXRUNTIME_BRANCH to test a particular repo and branch. Default is https://github.com/intel/onnxruntime for repo and master for branch. Please change it accordingly while building the image.
       ### CPU Version 
 
       1. Build your docker image: 
