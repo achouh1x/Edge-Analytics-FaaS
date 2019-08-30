@@ -33,7 +33,7 @@ ARG DEVICE
 
 
 ARG ONNXRUNTIME_REPO=https://github.com/intel/onnxruntime
-ARG ONNXRUNTIME_BRANCH=preview-v0.8.1
+ARG ONNXRUNTIME_BRANCH=master
 RUN mkdir -p /opt/cmake/bin
 
 ENV PATH /opt/cmake/bin:$PATH
@@ -41,8 +41,7 @@ ENV PATH /opt/cmake/bin:$PATH
 RUN wget https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2-Linux-x86_64.tar.gz && \
     tar -xf cmake-3.13.2-Linux-x86_64.tar.gz --strip 1 -C /opt/cmake && rm -rf /cmake-3.13.2-Linux-x86_64.tar.gz
 
-RUN /bin/bash -c "source /opt/intel/computer_vision_sdk/bin/setupvars.sh" && \
-    git clone --recursive -b $ONNXRUNTIME_BRANCH $ONNXRUNTIME_REPO /onnxruntime && \
+RUN git clone --recursive -b $ONNXRUNTIME_BRANCH $ONNXRUNTIME_REPO /onnxruntime && \
     cd /onnxruntime/cmake/external/onnx && python3 setup.py install && \
     cd /onnxruntime && ./build.sh --config RelWithDebInfo --update --build --parallel --use_openvino $DEVICE --build_wheel && pip3 install /onnxruntime/build/Linux/RelWithDebInfo/dist/*-linux_x86_64.whl && rm -rf /onnxruntime
 
