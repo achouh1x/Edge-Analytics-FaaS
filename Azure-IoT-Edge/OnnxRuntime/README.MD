@@ -52,13 +52,13 @@
         docker run -it --network host --privileged -v /dev:/dev  onnxruntime-myriad:latest
 
         ```
-      ### VAD-R Accelerator Version 
+      ### VAD-M Accelerator Version 
 
       1. Build your docker image: 
       
          Build the docker image from the DockerFile in this repository.
          ``` 
-         docker build -t onnxruntime-vadr --build-arg DEVICE=VAD-R_FP16 --network host . 
+         docker build -t onnxruntime-vadr --build-arg DEVICE=VAD-M_FP16 --network host . 
          ```
    
       2. Install the HDDL drivers on the host machine according to the reference in [here](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_linux_ivad_vpu.html)
@@ -87,7 +87,7 @@
 
    - In the Container Create Options please replace as below
 
-     FOR HDDL,
+     FOR VAD-M,
   
       ```
       {
@@ -124,7 +124,26 @@
 	   }
 	 }
        ```
-	
+     FOR MYRIAD,
+  
+      ```
+      {
+       "HostConfig": {
+	    "Binds": [
+             	"/opt/intel/dl/data:/opt/intel/dl/data"
+	      ],
+	      "NetworkMode": "host",
+	      "Privileged": true,
+	    "Devices": [
+	      {
+			"PathOnHost": "/dev",
+			"PathInContainer": "/dev",
+			"CgroupPermissions": "rwm"			 
+	      }
+	    ]
+	   }
+	 }
+       ```
   ### ONNX Models
   Pre trained ONNX Models for evaluation can be downloaded from the [ONNX Model Zoo](https://github.com/onnx/models).
 
