@@ -124,26 +124,7 @@
 	   }
 	 }
        ```
-     FOR MYRIAD,
-  
-      ```
-      {
-       "HostConfig": {
-	    "Binds": [
-             	"/opt/intel/dl/data:/opt/intel/dl/data"
-	      ],
-	      "NetworkMode": "host",
-	      "Privileged": true,
-	    "Devices": [
-	      {
-			"PathOnHost": "/dev",
-			"PathInContainer": "/dev",
-			"CgroupPermissions": "rwm"			 
-	      }
-	    ]
-	   }
-	 }
-       ```
+     
   ### ONNX Models
   Pre trained ONNX Models for evaluation can be downloaded from the [ONNX Model Zoo](https://github.com/onnx/models).
 
