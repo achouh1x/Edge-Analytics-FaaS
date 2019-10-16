@@ -47,8 +47,8 @@ RUN tar -xzf l_openvino_toolkit*.tgz && \
     cd /opt/intel/openvino/deployment_tools/model_optimizer/install_prerequisites && ./install_prerequisites_onnx.sh
 
 ENV LD_LIBRARY_PATH=/usr/lib:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
-ENV INTEL_OPENVINO_DIR=/opt/intel/openvino_2019.1.144
-ENV INTEL_CVSDK_DIR=/opt/intel/openvino_2019.1.144
+ENV INTEL_OPENVINO_DIR=/opt/intel/openvino_2019.3.334
+ENV INTEL_CVSDK_DIR=/opt/intel/openvino_2019.3.334
 ENV LD_LIBRARY_PATH=${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/model_optimizer_caffe/bin:${LD_LIBRARY_PATH}
 ENV ModelOptimizer_ROOT_DIR=${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/model_optimizer_caffe
 ENV InferenceEngine_DIR=${INTEL_CVSDK_DIR}/deployment_tools/inference_engine/share
