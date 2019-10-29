@@ -40,15 +40,16 @@ RUN tar -xzf l_openvino_toolkit*.tgz && \
     sed -i "s/$pattern/$replacement/" silent.cfg && \
     sed -i 's/decline/accept/g' silent.cfg && \
     ./install.sh -s silent.cfg && \
-    /bin/bash -c "source /opt/intel/computer_vision_sdk/bin/setupvars.sh" && \
-    ./install_cv_sdk_dependencies.sh && \
+    ./install_openvino_dependencies.sh && \
     cd - && \
-    rm -rf l_openvino_toolkit*
+    rm -rf l_openvino_toolkit* && \
+    cd /opt/intel/openvino/deployment_tools/model_optimizer/install_prerequisites && ./install_prerequisites_onnx.sh && \
+    cd /opt/intel/openvino/install_dependencies && sudo ./_install_all_dependencies.sh && sudo dpkg -i *.deb 
+    
 
 ENV LD_LIBRARY_PATH=/usr/lib:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
-ENV INTEL_OPENVINO_DIR=/opt/intel/openvino_2019.3.334
-ENV INTEL_CVSDK_DIR=/opt/intel/openvino_2019.3.334
-ENV LD_LIBRARY_PATH=${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/model_optimizer_caffe/bin:${LD_LIBRARY_PATH}
+ENV INTEL_OPENVINO_DIR=/opt/intel/openvino_2019.3.376
+ENV INTEL_CVSDK_DIR=/opt/intel/openvino_2019.3.376
 ENV ModelOptimizer_ROOT_DIR=${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/model_optimizer_caffe
 ENV InferenceEngine_DIR=${INTEL_CVSDK_DIR}/deployment_tools/inference_engine/share
 ENV IE_PLUGINS_PATH=${INTEL_CVSDK_DIR}/deployment_tools/inference_engine/lib/intel64
@@ -61,17 +62,10 @@ ENV PYTHONPATH=$INTEL_CVSDK_DIR/python/python3.5:${INTEL_CVSDK_DIR}/python/pytho
 ENV HDDL_INSTALL_DIR=${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/external/hddl
 ENV LD_LIBRARY_PATH=${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/external/hddl/lib:$LD_LIBRARY_PATH
 
-RUN wget https://github.com/intel/compute-runtime/releases/download/19.15.12831/intel-gmmlib_19.1.1_amd64.deb
-RUN wget https://github.com/intel/compute-runtime/releases/download/19.15.12831/intel-igc-core_1.0.2-1787_amd64.deb
-RUN wget https://github.com/intel/compute-runtime/releases/download/19.15.12831/intel-igc-opencl_1.0.2-1787_amd64.deb
-RUN wget https://github.com/intel/compute-runtime/releases/download/19.15.12831/intel-opencl_19.15.12831_amd64.deb
-RUN wget https://github.com/intel/compute-runtime/releases/download/19.15.12831/intel-ocloc_19.15.12831_amd64.deb
-
-RUN sudo dpkg -i *.deb && rm -rf *.deb
 
 ARG DEVICE=CPU_FP32
 ARG ONNXRUNTIME_REPO=https://github.com/intel/onnxruntime
-ARG ONNXRUNTIME_BRANCH=preview-v0.8.1
+ARG ONNXRUNTIME_BRANCH=openvino_R3
 
 RUN mkdir -p /opt/cmake/bin
 
@@ -82,7 +76,8 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2
 
 RUN git clone --recursive -b $ONNXRUNTIME_BRANCH $ONNXRUNTIME_REPO /onnxruntime && \
     cd /onnxruntime/cmake/external/onnx && python3 setup.py install && \
-    cd /onnxruntime && ./build.sh --config RelWithDebInfo --update --build --parallel --use_openvino $DEVICE --build_wheel && pip3 install /onnxruntime/build/Linux/RelWithDebInfo/dist/*-linux_x86_64.whl && rm -rf /onnxruntime
+    cd /onnxruntime && ./build.sh --config RelWithDebInfo --update --build --parallel --use_openvino $DEVICE --build_wheel && pip3 install /onnxruntime/build/Linux/RelWithDebInfo/dist/*-linux_x86_64.whl 
+#&& rm -rf /onnxruntime
 
 RUN pip3 install pytest && locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
 
