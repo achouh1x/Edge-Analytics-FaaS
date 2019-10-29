@@ -6,7 +6,7 @@
 
     Build the openVINO docker image from the DockerFile in this repository. Before that, download OpenVINO online installer version 2019 R1.1 from [here](https://software.intel.com/en-us/openvino-toolkit/choose-download) and copy the openvino tar file in the same directory and build the image. The online installer size is only 16MB and the components needed for the accelerators are mentioned in the dockerfile. 
      ```
-     # This docker image has all the openvino dependencies along with CPU, GPU and VAD-R drivers. This will be base image with name openvino
+     # This docker image has all the openvino dependencies along with CPU, GPU and VAD-M drivers. This will be base image with name openvino
       docker build -t openvino -f Dockerfile.openvino --network host .
      ```
       
