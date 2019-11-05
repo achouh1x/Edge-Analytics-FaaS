@@ -1,26 +1,30 @@
 # Quick-start Docker containers for ONNX Runtime OpenVino EP
 
-0. Prerequisites: Build openvino image with OpenVINO version 2019 R1.1. 
-   
-1. Retrieve your base openVINO docker image as follows:
+This folder has three Docker files:
+```
+    Dockerfile.openvino : This docker file is used to build openvino base image
+    Dockerfile : This docker file is used to build onnxrt with Openvino Execution Provider. Takes in openvino as base image
+    Dockerfile.iot : This is used for building docker images which can deployed through Azure IotEdge
+```
+1. Build base openVINO docker image as follows:
 
-    Build the openVINO docker image from the DockerFile in this repository. Before that, download OpenVINO online installer version 2019 R1.1 from [here](https://software.intel.com/en-us/openvino-toolkit/choose-download) and copy the openvino tar file in the same directory and build the image. The online installer size is only 16MB and the components needed for the accelerators are mentioned in the dockerfile. 
+   Download OpenVINO online installer version 2019 R3.1 from [here](https://software.intel.com/en-us/openvino-toolkit/choose-download) and copy the openvino tar file in the same directory as the Dockerfile.openvino and build the base openvino image. The online installer size is only 16MB and the components needed for the accelerators are mentioned in the dockerfile. 
      ```
      # This docker image has all the openvino dependencies along with CPU, GPU and VAD-M drivers. This will be base image with name openvino
       docker build -t openvino -f Dockerfile.openvino --network host .
      ```
       
-2. Steps to build and run on different hardware/accelarator are provided below:  
+2. Build and run ONNXRT with Openvino EP on different hardware/accelarator as below:  
 
-    Providing the argument device enables onnxruntime for that particular device. You can also provide arguments ONNXRUNTIME_REPO and ONNXRUNTIME_BRANCH to test a particular repo and branch. Default is https://github.com/intel/onnxruntime for repo and master for branch. Please change it accordingly while building the image.
+    Use the 'Dockerfile' to build the onnxrt with openvino EP. This dockerfile has openvino as base image. You can pass build arguments while building docker image by specifying  --build-arg DEVICE=CPU_FP32  or --build-arg ONNXRUNTIME_REPO=https://github.com/intel/onnxruntime or --build-arg ONNXRUNTIME_BRANCH=master
+    Providing the argument device enables onnxruntime to build for a particular device. You can also provide arguments ONNXRUNTIME_REPO and ONNXRUNTIME_BRANCH to test a particular repo and branch. Default is https://github.com/intel/onnxruntime for repo and master for branch. Please change it accordingly while building the image.
+    
       ### CPU Version 
 
-      1. Build your docker image: 
+      1. Build CPU onnxruntime docker image: 
 
-         Build the docker image from the DockerFile in this repository. 
-        
           ```
-          docker build -t onnxruntime-cpu --build-arg DEVICE=CPU_FP32 --network host .
+          docker build -t onnxruntime-cpu -f Dockerfile --build-arg DEVICE=CPU_FP32 --network host .
           ```
       2. Run the docker image
           ```
@@ -29,11 +33,10 @@
 
       ### GPU Version
 
-      1. Build your docker image:
+      1. Build GPU onnxruntime docker image:
 
-         Build the docker image from the DockerFile in this repository.
           ``` 
-          docker build -t onnxruntime-gpu --build-arg DEVICE=GPU_FP32 --network host . 
+          docker build -t onnxruntime-gpu -f Dockerfile --build-arg DEVICE=GPU_FP32 --network host . 
           ```
         
       2. Run the docker image
@@ -42,9 +45,9 @@
           ```
      ### Myriad VPU Accelerator Version 
 
-     1. Build the docker image from the DockerFile in this repository.
+     1. Build onnxruntime Myriad image from the DockerFile in this repository.
         ``` 
-         docker build -t onnxruntime-myriad --build-arg DEVICE=MYRIAD_FP16 --network host . 
+         docker build -t onnxruntime-myriad -f Dockerfile --build-arg DEVICE=MYRIAD_FP16 --network host . 
         ```
      2. Install the Myriad rules drivers on the host machine according to the reference in [here](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_linux.html#additional-NCS-steps)
      3. Run the docker image by mounting the device drivers
@@ -54,11 +57,11 @@
         ```
       ### VAD-M Accelerator Version 
 
-      1. Build your docker image: 
+      1. Build VAD-M onnxruntime docker image: 
       
          Build the docker image from the DockerFile in this repository.
          ``` 
-         docker build -t onnxruntime-vadr --build-arg DEVICE=VAD-M_FP16 --network host . 
+         docker build -t onnxruntime-vadm -f Dockerfile --build-arg DEVICE=VAD-M_FP16 --network host . 
          ```
    
       2. Install the HDDL drivers on the host machine according to the reference in [here](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_linux_ivad_vpu.html)
@@ -67,52 +70,47 @@
          docker run -it --device --mount type=bind,source=/var/tmp,destination=/var/tmp --device /dev/ion:/dev/ion  onnxruntime-hddl:latest
          ```
 
-## Azure IOt Edge with ONNX Runtime-OpenvinoEP
+## Deploy ONNX Runtime-OpenvinoEP modules through Azure Iot Edge 
+1 Deploy these images by following the tutorial in here [Azure IOT Edge](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux). We have the sample docker file Dockerfile.iot. The base image can be onnxruntime-cpu/gpu/vadm based on the accelerator selected. Please edit the Docker file to change base image name that was built for the accelerator.
 
-1 Deploy these image through [Azure IOT Edge](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux) with the docker file Dockerfile.iot. The base image can be onnxruntime-cpu/gpu/vadr based on the accelerator selected. Please edit the Docker file to change base image name that was built for the accelerator.
-
-   - Build the docker image from the DockerFile in this repository.
+   - Build the docker image based on DockerFile.iot in this repository.
      ``` 
-      docker build -t onnx-iot -f Dockerfile.iot --build-arg MODEL_XML_PATH=<onnxmodel> --build-arg INPUT=<inputimage> --build-arg SCRIPTNAME=<scriptname> --build-arg CONNECTIONSTRING=<iotedgeconnectionstring> --network host . 
+      docker build -t onnx-iot -f Dockerfile.iot --build-arg MODEL_XML_PATH=<onnxmodel> --build-arg INPUT=<inputimage> --build-arg SCRIPTNAME=<scriptname> --network host . 
      ```
+     One can pass arguments like the onnx model file(MODEL_XML_PATH), inference script(SCRIPTNAME) and input image name(INPUT) as build arguments while building the docker image or while deploying the image via Azure console in the environment variables section. 
+    
 2. Provide the below configuration details while deploying the iot module on Azure portal. 
 
+    -- For environment variables in Azure deployment page
 	|Environment Variables | Value |
 	| --------- | -------- |
-	| <code>MODEL_XML_PATH</code> | /opt/intel/dl/data/model.onnx |
-	| <code>CONNECTIONSTRING</code> |Azure Iot HUb connection string |
-	| <code>SCRIPTNAME</code> | /opt/intel/dl/data/pythonscript |
-	| <code>INPUT</code> | /opt/intel/data/image |
+	| <code>MODEL_XML_PATH</code> | <path to onnx model>|
+	| <code>CONNECTIONSTRING</code> |Azure Iot Hub connection string |
+	| <code>SCRIPTNAME</code> | <path to inference script> |
+	| <code>INPUT</code> | <path to input image for inference> |
 	
 
-   - In the Container Create Options please replace as below
-
-     FOR VAD-M,
+   - In the Container Create Options section please use below config details
+      <DATA> : is the path on the edge system where the input artifacts are located
   
+      For CPU,
       ```
       {
        "HostConfig": {
 	    "Binds": [
-		"/var/tmp:/var/tmp",
-                "/opt/intel/dl/data:/opt/intel/dl/data"
-	      ],
-	    "Devices": [
-	      {
-			"PathOnHost": "/dev/ion",
-			"PathInContainer": "/dev/ion",
-			"CgroupPermissions": "rwm"
-	      }
-	    ]
+             	"<DATA>:<DATA>"
+	      ]
 	   }
 	 }
        ```
-      FOR GPU,
+   
+      For GPU,
   
       ```
       {
        "HostConfig": {
 	    "Binds": [
-             	"/opt/intel/dl/data:/opt/intel/dl/data"
+             	"<DATA>:<DATA>"
 	      ],
 	    "Devices": [
 	      {
@@ -124,6 +122,26 @@
 	   }
 	 }
        ```
+     FOR VAD-M,
+  
+      ```
+      {
+       "HostConfig": {
+	    "Binds": [
+		"/var/tmp:/var/tmp",
+                "<DATA>:<DATA>"
+	      ],
+	    "Devices": [
+	      {
+			"PathOnHost": "/dev/ion",
+			"PathInContainer": "/dev/ion",
+			"CgroupPermissions": "rwm"
+	      }
+	    ]
+	   }
+	 }
+       ```
+     
      
   ### ONNX Models
   Pre trained ONNX Models for evaluation can be downloaded from the [ONNX Model Zoo](https://github.com/onnx/models).
