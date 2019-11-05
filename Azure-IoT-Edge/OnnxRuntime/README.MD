@@ -82,17 +82,19 @@ This folder has three Docker files:
 2. Provide the below configuration details while deploying the iot module on Azure portal. 
 
     -- For environment variables in Azure deployment page
+    
 	|Environment Variables | Value |
 	| --------- | -------- |
-	| <code>MODEL_XML_PATH</code> | <path to onnx model>|
+	| <code>MODEL_XML_PATH</code> | specify path to onnx model|
 	| <code>CONNECTIONSTRING</code> |Azure Iot Hub connection string |
-	| <code>SCRIPTNAME</code> | <path to inference script> |
-	| <code>INPUT</code> | <path to input image for inference> |
+	| <code>SCRIPTNAME</code> | specify path to inference script |
+	| <code>INPUT</code> | specify path to input image for inference |
 	
 
    - In the Container Create Options section please use below config details
+      ```
       <DATA> : is the path on the edge system where the input artifacts are located
-  
+       ```
       For CPU,
       ```
       {
