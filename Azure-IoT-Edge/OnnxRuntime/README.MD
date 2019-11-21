@@ -143,7 +143,31 @@ This folder has three Docker files:
 	   }
 	 }
        ```
-     
+      For Myriad,
+      
+       ```
+       {
+              "HostConfig":
+              {
+                             "Binds":
+                             [
+                                           "/dev:/dev"
+                             ],
+                             "NetworkMode":"host",
+                             "IpcMode":"host",
+                             "Privileged":true
+              },
+              "NetworkingConfig":
+              {
+                             "EndpointsConfig":
+                             {
+                                           "host":
+                                           {}
+                             }
+              }
+       }
+      ```
+       
      
   ### ONNX Models
   Pre trained ONNX Models for evaluation can be downloaded from the [ONNX Model Zoo](https://github.com/onnx/models).
