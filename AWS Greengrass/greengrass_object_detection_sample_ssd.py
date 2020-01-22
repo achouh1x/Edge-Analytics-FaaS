@@ -1,49 +1,40 @@
+#!/usr/bin/env python
 """
-BSD 3-clause "New" or "Revised" license
+ Copyright (C) 2018-2019 Intel Corporation
 
-Copyright (C) 2018 Intel Coporation.
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
+      http://www.apache.org/licenses/LICENSE-2.0
 
-* Redistributions of source code must retain the above copyright notice, this
-  list of conditions and the following disclaimer.
-
-* Redistributions in binary form must reproduce the above copyright notice,
-  this list of conditions and the following disclaimer in the documentation
-  and/or other materials provided with the distribution.
-
-* Neither the name of the copyright holder nor the names of its
-  contributors may be used to endorse or promote products derived from
-  this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
 """
 
+from __future__ import print_function
 import sys
 import os
+from argparse import ArgumentParser, SUPPRESS
 import cv2
+import time
+import logging as log
 import numpy as np
+import datetime
+import threading
 import greengrasssdk
 import boto3
-import timeit
-import datetime
 import json
-from collections import OrderedDict 
+from collections import OrderedDict
 
-from openvino.inference_engine import IENetwork, IEPlugin
+from openvino.inference_engine import IENetwork, IECore, IEPlugin
+
 
 # Specify the delta in seconds between each report
-reporting_interval = 1.0
+sys_interval = 5.0
 
 # Parameters for IoT Cloud
 enable_iot_cloud_output = True
@@ -70,9 +61,9 @@ if enable_s3_jpeg_output:
 
 # Create a Kinesis client for putting records to streams
 if enable_kinesis_output:
-    kinesis_client = boto3.client("kinesis", "us-west-2")
+    kinesis_client = boto3.client("kinesis", "us-east-2")
 
-# Read environment variables set by Lambda function configuration
+
 PARAM_MODEL_XML = os.environ.get("PARAM_MODEL_XML")
 PARAM_INPUT_SOURCE = os.environ.get("PARAM_INPUT_SOURCE")
 PARAM_DEVICE = os.environ.get("PARAM_DEVICE")
@@ -80,8 +71,21 @@ PARAM_OUTPUT_DIRECTORY = os.environ.get("PARAM_OUTPUT_DIRECTORY")
 PARAM_CPU_EXTENSION_PATH = os.environ.get("PARAM_CPU_EXTENSION_PATH")
 PARAM_LABELMAP_FILE = os.environ.get("PARAM_LABELMAP_FILE")
 PARAM_TOPIC_NAME = os.environ.get("PARAM_TOPIC_NAME", "intel/faas/ssd")
+PARAM_PROB_THRESHOLD = os.environ.get("PARAM_PROB_THRESHOLD")
 
-def report(res_json, frame):
+# Comment out these lines to enable using custom batch size, number of streams, and number of requests.
+# Batch size should be divisors of number of streams. (If number of streams is 16, batch size should be either 1, 2, 4, 8, or 16)
+#PARAM_BATCH_SIZE = os.environ.get("PARAM_BATCH_SIZE")
+#PARAM_NUM_REQUESTS = os.environ.get("PARAM_NUM_REQUESTS")
+#PARAM_NUM_STREAMS = os.environ.get("PARAM_NUM_STREAMS")
+
+# Use the fixed batch size, number of requests, and number of streams for a AWS Greengrass demo with a single input.
+PARAM_BATCH_SIZE = 1
+PARAM_NUM_REQUESTS = 16
+PARAM_NUM_STREAMS = 1
+
+
+def report(res_json, frames):
     now = datetime.datetime.now()
     date_prefix = str(now).replace(" ", "_")
     if enable_iot_cloud_output:
@@ -90,89 +94,182 @@ def report(res_json, frame):
     if enable_kinesis_output:
         kinesis_client.put_record(StreamName=kinesis_stream_name, Data=json.dumps(res_json), PartitionKey=kinesis_partition_key)
     if enable_s3_jpeg_output:
-        temp_image = os.path.join(PARAM_OUTPUT_DIRECTORY, "inference_result.jpeg")
-        cv2.imwrite(temp_image, frame)
-        with open(temp_image) as file:
-            image_contents = file.read()
-            s3_client.put_object(Body=image_contents, Bucket=s3_bucket_name, Key=date_prefix + ".jpeg") 
+        s = 0
+        for frame in frames:
+            temp_image = os.path.join(PARAM_OUTPUT_DIRECTORY, "inference_result.jpeg")
+            cv2.imwrite(temp_image, frame)
+            with open(temp_image) as file:
+                image_contents = file.read()
+                s3_client.put_object(Body=image_contents, Bucket=s3_bucket_name, Key="stream" + str(s) + "_" +date_prefix + ".jpeg")
+            s += 1
     if enable_local_jpeg_output:
-        cv2.imwrite(os.path.join(PARAM_OUTPUT_DIRECTORY, date_prefix + ".jpeg"), frame)
+        s = 0
+        for frame in frames:
+            cv2.imwrite(os.path.join(PARAM_OUTPUT_DIRECTORY, "stream" + str(s) + "_" + date_prefix + ".jpeg"), frame)
+            s += 1
 
-    
+
 def greengrass_object_detection_sample_ssd_run():
-    client.publish(topic=PARAM_TOPIC_NAME, payload="OpenVINO: Initializing...")
+    client = greengrasssdk.client("iot-data")
+    client.publish(topic=PARAM_TOPIC_NAME, payload="Greengrass Object Detection Sample on OpenVINO R3.1")
+    model_xml = PARAM_MODEL_XML
     model_bin = os.path.splitext(PARAM_MODEL_XML)[0] + ".bin"
-
-    # Plugin initialization for specified device and load extensions library if specified
+    n_streams = int(PARAM_NUM_STREAMS)
+    b_size = int(PARAM_BATCH_SIZE)
+    n_requests = int(PARAM_NUM_REQUESTS)
+    prob_threshold = float(PARAM_PROB_THRESHOLD)
+    input_stream = []
+    cap = []
+    req_frames = []
+    frames_out = []
+    req_ids = []
+    inf_start = []
+    inf_frames = []
+    inf_fps = []
+    inf_time = []
+    num_frames = []
+    req_stride = n_streams/b_size
     plugin = IEPlugin(device=PARAM_DEVICE, plugin_dirs="")
+
+    log.info("Creating Inference Engine...")
     if "CPU" in PARAM_DEVICE:
         plugin.add_cpu_extension(PARAM_CPU_EXTENSION_PATH)
     # Read IR
-    net = IENetwork.from_ir(model=PARAM_MODEL_XML, weights=model_bin)
-    assert len(net.inputs.keys()) == 1, "Sample supports only single input topologies"
-    assert len(net.outputs) == 1, "Sample supports only single output topologies"
-    input_blob = next(iter(net.inputs))
+    log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
+    net = IENetwork(model=model_xml, weights=model_bin)
+    print("Batch Size: "+str(net.batch_size))
+
+    img_info_input_blob = None
+    feed_dict = {}
+    for blob_name in net.inputs:
+        if len(net.inputs[blob_name].shape) == 4:
+            input_blob = blob_name
+        elif len(net.inputs[blob_name].shape) == 2:
+            img_info_input_blob = blob_name
+        else:
+            raise RuntimeError("Unsupported {}D input layer '{}'. Only 2D and 4D input layers are supported"
+                               .format(len(net.inputs[blob_name].shape), blob_name))
+
+    assert len(net.outputs) == 1, "Demo supports only single output topologies"
+
     out_blob = next(iter(net.outputs))
+    client.publish(topic=PARAM_TOPIC_NAME, payload="Loading IR to the plugin...")
+    exec_net = plugin.load(network=net, num_requests=n_requests)
     # Read and pre-process input image
     n, c, h, w = net.inputs[input_blob].shape
-    cap = cv2.VideoCapture(PARAM_INPUT_SOURCE)
-    exec_net = plugin.load(network=net)
-    del net
-    client.publish(topic=PARAM_TOPIC_NAME, payload="Starting inference on %s" % PARAM_INPUT_SOURCE)
-    start_time = timeit.default_timer()
-    inf_seconds = 0.0
-    frame_count = 0
-    labeldata = None
-    if PARAM_LABELMAP_FILE is not None:
-       with open(PARAM_LABELMAP_FILE) as labelmap_file:
-            labeldata = json.load(labelmap_file)
-    
-    while (cap.isOpened()):
-        ret, frame = cap.read()
-        if not ret:
-            break
-        frameid = cap.get(cv2.CAP_PROP_POS_FRAMES)
-        initial_w = cap.get(3)
-        initial_h = cap.get(4)
-        in_frame = cv2.resize(frame, (w, h))
-        in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
-        in_frame = in_frame.reshape((n, c, h, w))
-        # Start synchronous inference
-        inf_start_time = timeit.default_timer()
-        res = exec_net.infer(inputs={input_blob: in_frame})
-        inf_seconds += timeit.default_timer() - inf_start_time
-        # Parse detection results of the current request
-        res_json = OrderedDict() 
-        frame_timestamp = datetime.datetime.now()    
-        object_id = 0
-        for obj in res[out_blob][0][0]:
-             if obj[2] > 0.5:
-                 xmin = int(obj[3] * initial_w)
-                 ymin = int(obj[4] * initial_h)
-                 xmax = int(obj[5] * initial_w)
-                 ymax = int(obj[6] * initial_h)
-                 cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (255, 165, 20), 4)
-                 obj_id = "Object" + str(object_id)
-                 classlabel = labeldata[str(int(obj[1]))] if labeldata else ""
-                 res_json[obj_id] = {"label": int(obj[1]), "class": classlabel, "confidence": round(obj[2], 2), "xmin": round(obj[3], 2), "ymin": round(obj[4], 2), "xmax": round(obj[5], 2), "ymax": round(obj[6], 2)}
-                 object_id += 1
-        frame_count += 1
-        # Measure elapsed seconds since the last report
-        seconds_elapsed = timeit.default_timer() - start_time
-        if seconds_elapsed >= reporting_interval:
-            res_json["timestamp"] = frame_timestamp.isoformat()
-            res_json["frame_id"] = int(frameid)   
-            res_json["inference_fps"] = frame_count / inf_seconds
-            start_time = timeit.default_timer()
-            report(res_json, frame)
-            frame_count = 0
-            inf_seconds = 0.0
+    if img_info_input_blob:
+        feed_dict[img_info_input_blob] = [h, w, 1]
 
-    client.publish(topic=PARAM_TOPIC_NAME, payload="End of the input, exiting...")
-    del exec_net
-    del plugin
+    if PARAM_INPUT_SOURCE == 'cam':
+        input_stream = 0
+    else:
+        for s in range(n_streams):
+            frames_out.append(0)
+            # Comment out the line below to use multiple streams. PARAM_INPUT_SOURCE should be path/to/dir/video_series_name where video file names are video_series_name0.mp4, video_series_name1.mp4, and so on.
+            #input_stream.append(PARAM_INPUT_SOURCE+str(s)+".mp4")
+            # Use the line below for single input file. PARAM_INPUT_SOURCE should be the path to a video file or a video device.
+            input_stream.append(PARAM_INPUT_SOURCE)
+            assert os.path.isfile(input_stream[s]), "Specified input file doesn't exist"
+    labels_map = None
+
+    for s in range(n_streams):
+        cap.append(cv2.VideoCapture(input_stream[s]))
+
+    for r in range(n_requests):
+        req_ids.append(r)
+        req_frames.append([])
+        inf_start.append(0)
+        inf_time.append(0)
+        inf_fps.append(0)
+        num_frames.append(0)
+
+    client.publish(topic=PARAM_TOPIC_NAME, payload="Starting inference...")
+    is_async_mode = False
+    render_time = 0
+
+    sys_time = time.time()
+    sys_frames = 0
+    output_time = time.time()
+    r = 0
+    running = True
+    while running:
+        in_batch = np.zeros((b_size, c, h, w))
+        frames = []
+        for b in range(b_size):
+            s = ((r%req_stride)*b_size)+b
+            if cap[s].isOpened():
+                ret, frame = cap[s].read()
+                if not ret:
+                    cap[s].set(2, 0)
+                    ret, frame = cap[s].read()
+                frames.append(frame)
+                initial_w = cap[s].get(3)
+                initial_h = cap[s].get(4)
+                in_frame = cv2.resize(frames[b], (w, h))
+                in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
+                in_frame = in_frame.reshape((1, c, h, w))
+                in_batch[b] = in_frame[0]
+        if len(frames) == b_size:
+            req_frames[req_ids[r]] = frames
+            feed_dict[input_blob] = in_batch
+            inf_start[r] = time.time()
+            exec_net.start_async(request_id=req_ids[r], inputs=feed_dict)
+            r = (r+1)%n_requests
+            if inf_start[r] != 0 and exec_net.requests[req_ids[r]].wait(-1) == 0:
+                sys_frames += b_size
+
+                # Parse detection results of the current request
+                res_json = OrderedDict()
+                timestamp = datetime.datetime.now()
+                res = exec_net.requests[req_ids[r]].outputs[out_blob]
+                object_id = 0
+                for obj in res[0][0]:
+                    # Draw only objects when probability more than specified threshold
+                    if obj[2] > prob_threshold and obj[0] < n_streams and obj[0] >= 0:
+                        b = int(obj[0])
+                        xmin = int(obj[3] * initial_w)
+                        ymin = int(obj[4] * initial_h)
+                        xmax = int(obj[5] * initial_w)
+                        ymax = int(obj[6] * initial_h)
+                        class_id = int(obj[1])
+                        # Draw box and label\class_id
+                        color = (min(class_id * 12.5, 255), min(class_id * 7, 255), min(class_id * 5, 255))
+                        if class_id == 2:
+                            color = (255, 0, 0)
+                        elif class_id == 3:
+                            color = (0, 255, 0)
+                        elif class_id == 5:
+                            color = (0, 255, 255)
+                        if ((xmin | ymin | xmax | ymax) & ~0xFFFF == 0) and (xmin < xmax) and (ymin < ymax) and b < b_size:
+                            cv2.rectangle(req_frames[r][b], (xmin, ymin), (xmax, ymax), color, 2)
+                            det_label = labels_map[class_id] if labels_map else str(class_id)
+                            cv2.putText(req_frames[r][b], det_label + ' ' + str(round(obj[2] * 100, 1)) + ' %', (xmin, ymin - 7),
+                                    cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
+                            obj_id = "Object" + str(object_id)
+                            stream_offset = r%req_stride
+                            s = (stream_offset*b_size)+b
+                            res_json[obj_id] = {"stream": s, "label": int(obj[1]), "class": det_label, "confidence": round(obj[2], 2),
+                                    "xmin": round(obj[3], 2), "ymin": round(obj[4], 2), "xmax": round(obj[5], 2), "ymax": round(obj[6], 2)}
+                            object_id += 1
+
+                stream_offset = r%req_stride
+                for b in range(b_size):
+                    frames_out[(stream_offset*b_size)+b] = req_frames[r][b]
+
+            sys_elapsed = time.time()-sys_time
+            if (sys_elapsed >= sys_interval):
+                sys_fps = sys_frames / sys_elapsed
+                sys_time = time.time()
+                sys_frames = 0
+                res_json["timestamp"] = timestamp.isoformat()
+                res_json["system_fps"] = sys_fps
+                reportThread = threading.Thread(target=report, args=(res_json, frames_out,))
+                reportThread.start()
+                #client.publish(topic=PARAM_TOPIC_NAME, payload="Reported System FPS: "+str(sys_fps))
+
 
 greengrass_object_detection_sample_ssd_run()
+
 
 def function_handler(event, context):
     client.publish(topic=PARAM_TOPIC_NAME, payload='HANDLER_CALLED!')
