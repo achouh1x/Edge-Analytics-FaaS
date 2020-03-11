@@ -29,43 +29,34 @@
 FROM ubuntu:16.04
 
 RUN apt update && \
-    apt -y install python3.5 python3-pip zip x11-apps lsb-core wget cpio sudo libboost-python-dev libpng-dev zlib1g-dev git libnuma1 ocl-icd-libopencl1 clinfo libboost-filesystem1.58.0 libboost-thread1.58.0 protobuf-compiler libprotoc-dev && pip3 install numpy networkx opencv-python pytest && locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
+    apt -y install python3.5 python3-pip zip x11-apps lsb-core wget cpio sudo libboost-python-dev libpng-dev zlib1g-dev git libnuma1 ocl-icd-libopencl1 clinfo libboost-filesystem1.58.0 libboost-thread1.58.0 protobuf-compiler libprotoc-dev && pip3 install numpy networkx opencv-python pytest cython && locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
 
 ENV pattern="COMPONENTS=DEFAULTS"
 ENV replacement="COMPONENTS=intel-openvino-ie-sdk-ubuntu-xenial__x86_64;intel-openvino-ie-rt-cpu-ubuntu-xenial__x86_64;intel-openvino-ie-rt-gpu-ubuntu-xenial__x86_64;intel-openvino-ie-rt-vpu-ubuntu-xenial__x86_64;intel-openvino-ie-rt-hddl-ubuntu-xenial__x86_64;intel-openvino-model-optimizer__x86_64;intel-openvino-opencv-lib-ubuntu-xenial__x86_64"
-COPY l_openvino_*.tgz .
-RUN tar -xzf l_openvino_toolkit*.tgz && \
-    rm -rf l_openvino_toolkit*.tgz && \
-    cd l_openvino_toolkit* && \
-    sed -i "s/$pattern/$replacement/" silent.cfg && \
-    sed -i 's/decline/accept/g' silent.cfg && \
-    ./install.sh -s silent.cfg && \
-    ./install_openvino_dependencies.sh && \
-    cd - && \
-    rm -rf l_openvino_toolkit* && \
-    cd /opt/intel/openvino/deployment_tools/model_optimizer/install_prerequisites && ./install_prerequisites_onnx.sh && \
-    cd /opt/intel/openvino/install_dependencies && sudo ./_install_all_dependencies.sh && sudo dpkg -i *.deb 
-    
+COPY openvino_04_05_drop.tar.gz .
+RUN tar -xzf openvino_04_05_drop.tar.gz && \
+    rm -rf openvino_04_05_drop.tar.gz && \
+    cd /openvino_04_05_drop/install_dependencies  && dpkg -i *.deb && \
+    pip3 install networkx==2.3 test-generator==0.1.1 defusedxml>=0.5.0
 
-ENV LD_LIBRARY_PATH=/usr/lib:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
-ENV INTEL_OPENVINO_DIR=/opt/intel/openvino_2019.3.376
-ENV INTEL_CVSDK_DIR=/opt/intel/openvino_2019.3.376
-ENV ModelOptimizer_ROOT_DIR=${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/model_optimizer_caffe
-ENV InferenceEngine_DIR=${INTEL_CVSDK_DIR}/deployment_tools/inference_engine/share
-ENV IE_PLUGINS_PATH=${INTEL_CVSDK_DIR}/deployment_tools/inference_engine/lib/intel64
-ENV LD_LIBRARY_PATH=/opt/intel/opencl:${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/external/cldnn/lib:${INTEL_OPENVINO_DIR}/inference_engine/external/gna/lib:${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/external/mkltiny_lnx/lib:${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/external/omp/lib:${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/external/tbb/lib:${IE_PLUGINS_PATH}:${LD_LIBRARY_PATH}
-ENV OpenCV_DIR=${INTEL_OPENVINO_DIR}/opencv/share/OpenCV
-ENV LD_LIBRARY_PATH=${INTEL_OPENVINO_DIR}/opencv/lib:${INTEL_OPENVINO_DIR}/opencv/share/OpenCV/3rdparty/lib:${LD_LIBRARY_PATH}
-ENV PATH=${INTEL_CVSDK_DIR}/deployment_tools/model_optimizer:$PATH
-ENV PYTHONPATH=${INTEL_CVSDK_DIR}/deployment_tools/model_optimizer:$PYTHONPATH
-ENV PYTHONPATH=$INTEL_CVSDK_DIR/python/python3.5:${INTEL_CVSDK_DIR}/python/python3.5/ubuntu16:${PYTHONPATH}
-ENV HDDL_INSTALL_DIR=${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/external/hddl
-ENV LD_LIBRARY_PATH=${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/external/hddl/lib:$LD_LIBRARY_PATH
+
+ENV LD_LIBRARY_PATH=/opt/miniconda/lib:/usr/lib:/usr/lib/x86_64-linux-gnu:/opt/intel/opencl:$LD_LIBRARY_PATH
+ENV INTEL_CVSDK_DIR=/openvino_04_05_drop
+ENV INTEL_OPENVINO_DIR=/openvino_04_05_drop
+ENV OPENVINO_LIB_DIR=$INTEL_CVSDK_DIR/deployment_tools/inference_engine/lib/intel64
+ENV OPENVINO_NGRAPH_LIB_DIR=$INTEL_CVSDK_DIR/lib
+ENV OPENVINO_TBB_LIB_DIR=$INTEL_CVSDK_DIR/deployment_tools/inference_engine/external/tbb/lib
+ENV OPENVINO_MKL_TINY_LIB_DIR=$INTEL_CVSDK_DIR/deployment_tools/inference_engine/external/mkltiny_lnx/lib
+ENV HDDL_INSTALL_DIR=$INTEL_CVSDK_DIR/deployment_tools/inference_engine/external/hddl
+ENV InferenceEngine_DIR=$INTEL_CVSDK_DIR/deployment_tools/inference_engine/share
+ENV LD_LIBRARY_PATH=$OPENVINO_LIB_DIR:$OPENVINO_NGRAPH_LIB_DIR:$OPENVINO_TBB_LIB_DIR:$OPENVINO_MKL_TINY_LIB_DIR:$LD_LIBRARY_PATH:$INTEL_CVSDK_DIR/deployment_tools/inference_engine/external/hddl/lib
+RUN locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
+ENV LANG en_US.UTF-8
 
 
 ARG DEVICE=CPU_FP32
 ARG ONNXRUNTIME_REPO=https://github.com/intel/onnxruntime
-ARG ONNXRUNTIME_BRANCH=openvino_R3
+ARG ONNXRUNTIME_BRANCH=openvino-ep-v2
 
 RUN mkdir -p /opt/cmake/bin
 
@@ -74,11 +65,18 @@ ENV LANG en_US.UTF-8
 RUN wget https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2-Linux-x86_64.tar.gz && \
     tar -xf cmake-3.13.2-Linux-x86_64.tar.gz --strip 1 -C /opt/cmake && rm -rf /cmake-3.13.2-Linux-x86_64.tar.gz
 
-RUN git clone --recursive -b $ONNXRUNTIME_BRANCH $ONNXRUNTIME_REPO /onnxruntime && \
-    cd /onnxruntime/cmake/external/onnx && python3 setup.py install && \
-    cd /onnxruntime && ./build.sh --config RelWithDebInfo --update --build --parallel --use_openvino $DEVICE --build_wheel && pip3 install /onnxruntime/build/Linux/RelWithDebInfo/dist/*-linux_x86_64.whl 
-#&& rm -rf /onnxruntime
+RUN git clone --recursive -b $ONNXRUNTIME_BRANCH $ONNXRUNTIME_REPO && \
+    sed -i "s/sudo//" /onnxruntime/dockerfiles/scripts/install_common_deps.sh &&\
+    /bin/sh /onnxruntime/dockerfiles/scripts/install_common_deps.sh &&\
+    cd /onnxruntime/cmake/external/onnx && python3 setup.py install 
+
+RUN cd /onnxruntime && ./build.sh --config RelWithDebInfo --update --build --parallel --use_openvino $DEVICE --build_wheel
+
+RUN cd /onnxruntime/build/Linux/RelWithDebInfo && pip3 install  dist/*-linux_x86_64.whl && cd onnxruntime/capi && cp plugins.xml /usr/local/lib/python3.5/dist-packages/onnxruntime/capi/
 
 RUN pip3 install pytest && locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
+
+
+
 
 
