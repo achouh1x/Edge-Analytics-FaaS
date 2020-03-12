@@ -8,7 +8,7 @@ This folder has three Docker files:
 ```
 1. Build base openVINO docker image as follows:
 
-   Download OpenVINO online installer version 2019 R3.1 from [here](https://software.intel.com/en-us/openvino-toolkit/choose-download) and copy the openvino tar file in the same directory as the Dockerfile.openvino and build the base openvino image. The online installer size is only 16MB and the components needed for the accelerators are mentioned in the dockerfile. 
+   Download OpenVINO custom binary openvino_04_05_drop.tar.gz and copy the openvino tar file in the same directory as the Dockerfile.openvino and build the base openvino image. The online installer size is only 16MB and the components needed for the accelerators are mentioned in the dockerfile. 
      ```
      # This docker image has all the openvino dependencies along with CPU, GPU and VAD-M drivers. This will be base image with name openvino
       docker build -t openvino -f Dockerfile.openvino --network host .
@@ -69,6 +69,9 @@ This folder has three Docker files:
          ```
          docker run -it --device --mount type=bind,source=/var/tmp,destination=/var/tmp --device /dev/ion:/dev/ion  onnxruntime-hddl:latest
          ```
+
+## Choose hardware target dynamically
+The target hardware selected during Docker build stage forms the Default hardware target. This value however can be overriden with a different target at runtime by calling the corresponding APIs from the application. Refer to this [Dynamic device selection API documentation](https://github.com/intel/onnxruntime/blob/openvino-ep-v2/docs/execution_providers/OpenVINO-ExecutionProvider.md#dynamic-device-selection) for more details.
 
 ## Deploy ONNX Runtime-OpenvinoEP modules through Azure Iot Edge 
 1 Deploy these images by following the tutorial in here [Azure IOT Edge](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux). We have the sample docker file Dockerfile.iot. The base image can be onnxruntime-cpu/gpu/vadm based on the accelerator selected. Please edit the Docker file to change base image name that was built for the accelerator.
