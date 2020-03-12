@@ -75,8 +75,3 @@ RUN cd /onnxruntime && ./build.sh --config RelWithDebInfo --update --build --par
 RUN cd /onnxruntime/build/Linux/RelWithDebInfo && pip3 install  dist/*-linux_x86_64.whl && cd onnxruntime/capi && cp plugins.xml /usr/local/lib/python3.5/dist-packages/onnxruntime/capi/
 
 RUN pip3 install pytest && locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
-
-
-
-
-
