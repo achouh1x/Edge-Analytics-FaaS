@@ -8,7 +8,7 @@ This folder has three Docker files:
 ```
 1. Build base openVINO docker image as follows:
 
-   Download OpenVINO custom binary openvino_04_05_drop.tar.gz and copy the openvino tar file in the same directory as the Dockerfile.openvino and build the base openvino image. The online installer size is only 16MB and the components needed for the accelerators are mentioned in the dockerfile. 
+   Download OpenVINO **version 2020.2** for Linux targets from [OpenVINO download page](https://software.intel.com/en-us/openvino-toolkit) and copy the openvino tar file in the same directory as the Dockerfile.openvino and build the base openvino image. The online installer size is only 16MB and the components needed for the accelerators are mentioned in the dockerfile. 
      ```
      # This docker image has all the openvino dependencies along with CPU, GPU and VAD-M drivers. This will be base image with name openvino
       docker build -t openvino -f Dockerfile.openvino --network host .

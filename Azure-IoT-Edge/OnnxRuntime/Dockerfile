@@ -30,8 +30,8 @@
 FROM openvino:latest
 
 ARG DEVICE=CPU_FP32
-ARG ONNXRUNTIME_REPO=https://github.com/intel/onnxruntime
-ARG ONNXRUNTIME_BRANCH=openvino-ep-v2
+ARG ONNXRUNTIME_REPO=https://github.com/microsoft/onnxruntime
+ARG ONNXRUNTIME_BRANCH=master
 
 RUN mkdir -p /opt/cmake/bin
 
@@ -47,6 +47,6 @@ RUN git clone --recursive -b $ONNXRUNTIME_BRANCH $ONNXRUNTIME_REPO && \
 
 RUN cd /onnxruntime && ./build.sh --config RelWithDebInfo --update --build --parallel --use_openvino $DEVICE --build_wheel
 
-RUN cd /onnxruntime/build/Linux/RelWithDebInfo && pip3 install  dist/*-linux_x86_64.whl && cd onnxruntime/capi && cp plugins.xml /usr/local/lib/python3.5/dist-packages/onnxruntime/capi/
+RUN cd /onnxruntime/build/Linux/RelWithDebInfo && pip3 install  dist/*-linux_x86_64.whl
 
 RUN pip3 install pytest && locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8

@@ -3,7 +3,7 @@
 
    Retrieve your docker image in one of the following ways.
 
-    -  For building the docker image, download OpenVINO custom binary package openvino_04_05_drop.tar.gz and copy the openvino tar file in the same directory and build the image. The online installer size is only 16MB and the components needed for the accelerators are mentioned in the dockerfile.Providing the argument device enables onnxruntime for that particular device.You can also provide arguments ONNXRUNTIME_REPO and ONNXRUNTIME_BRANCH to test that particular repo and branch. Default is https://github.com/intel/onnxruntime for repo and preview-v0.8.1 for branch
+    -  For building the docker image, Download OpenVINO **version 2020.2** for Linux targets from [OpenVINO download page](https://software.intel.com/en-us/openvino-toolkit) and copy the openvino tar file in the same directory and build the image. The online installer size is only 16MB and the components needed for the accelerators are mentioned in the dockerfile.Providing the argument device enables onnxruntime for that particular device.You can also provide arguments ONNXRUNTIME_REPO and ONNXRUNTIME_BRANCH to test that particular repo and branch. Default is https://github.com/intel/onnxruntime for repo and preview-v0.8.1 for branch
        ```
        docker build -t onnxruntime --build-arg DEVICE=$DEVICE .
        ```
@@ -90,6 +90,9 @@
     docker run -it --device --mount type=bind,source=/var/tmp,destination=/var/tmp --device /dev/ion:/dev/ion  onnxruntime-hddl:latest
 
     ```
+
+## Choose hardware target dynamically
+The target hardware selected during Docker build stage forms the Default hardware target. This value however can be overriden with a different target at runtime by calling the corresponding APIs from the application. Refer to this [Dynamic device selection API documentation](https://github.com/intel/onnxruntime/blob/openvino-ep-v2/docs/execution_providers/OpenVINO-ExecutionProvider.md#dynamic-device-selection) for more detail
 
 ### Azure IOt Edge with ONNX Runtime-OpenvinoEP
 
