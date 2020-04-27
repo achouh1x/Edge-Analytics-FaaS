@@ -26,10 +26,17 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 FROM ubuntu:16.04
 
 RUN apt update && \
-    apt -y install python3.5 python3-pip zip x11-apps lsb-core wget cpio sudo libboost-python-dev libpng-dev zlib1g-dev git libnuma1 ocl-icd-libopencl1 clinfo libboost-filesystem1.58.0 libboost-thread1.58.0 protobuf-compiler libprotoc-dev && pip3 install numpy networkx opencv-python pytest cython && locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
+    apt -y install python3.5 python3-pip zip x11-apps lsb-core wget cpio sudo libboost-python-dev libpng-dev zlib1g-dev git libnuma1 ocl-icd-libopencl1 clinfo libboost-filesystem1.58.0 libboost-thread1.58.0 protobuf-compiler libprotoc-dev && pip3 install numpy networkx opencv-python pytest cython && locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8 
+
+#Only required for hddl
+RUN apt-get update && \
+    apt-get -y install autoconf automake libgtk-3-dev libtool
+
+
 
 ENV pattern="COMPONENTS=DEFAULTS"
 ENV replacement="COMPONENTS=intel-openvino-ie-sdk-ubuntu-xenial__x86_64;intel-openvino-ie-rt-cpu-ubuntu-xenial__x86_64;intel-openvino-ie-rt-gpu-ubuntu-xenial__x86_64;intel-openvino-ie-rt-vpu-ubuntu-xenial__x86_64;intel-openvino-ie-rt-hddl-ubuntu-xenial__x86_64;intel-openvino-model-optimizer__x86_64;intel-openvino-opencv-lib-ubuntu-xenial__x86_64"
@@ -42,14 +49,15 @@ RUN tar -xzf l_openvino_toolkit*.tgz && \
     ./install.sh -s silent.cfg && \
     cd - && \
     rm -rf l_openvino_toolkit* && \
-    cd /opt/intel/openvino/install_dependencies && ./_install_all_dependencies.sh && dpkg -i *.deb && \
-    pip install networkx==2.3 test-generator==0.1.1 defusedxml>=0.5.0
+    cd /opt/intel/openvino_2020.2.120/install_dependencies && ./_install_all_dependencies.sh && dpkg -i *.deb && \
+    pip3 install networkx==2.3 test-generator==0.1.1 defusedxml>=0.5.0
 
 ENV LD_LIBRARY_PATH=/opt/miniconda/lib:/usr/lib:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
 ENV INTEL_OPENVINO_DIR=/opt/intel/openvino_2020.2.120
 ENV InferenceEngine_DIR=${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/share
 ENV IE_PLUGINS_PATH=${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/lib/intel64
-ENV LD_LIBRARY_PATH=/opt/intel/opencl:${INTEL_OPENVINO_DIR}/inference_engine/external/gna/lib:${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/external/mkltiny_lnx/lib:$INTEL_OPENVINO_DIR/deployment_tools/ngraph/lib:${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/external/omp/lib:${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/external/tbb/lib:${IE_PLUGINS_PATH}:${LD_LIBRARY_PATH}
+ENV ngraph_DIR=${INTEL_OPENVINO_DIR}/deployment_tools/ngraph/
+ENV LD_LIBRARY_PATH=/opt/intel/opencl:${INTEL_OPENVINO_DIR}/inference_engine/external/gna/lib:${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/external/mkltiny_lnx/lib:$INTEL_OPENVINO_DIR/deployment_tools/ngraph:${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/external/omp/lib:${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/external/tbb/lib:${IE_PLUGINS_PATH}:${LD_LIBRARY_PATH}
 ENV OpenCV_DIR=${INTEL_OPENVINO_DIR}/opencv/share/OpenCV
 ENV LD_LIBRARY_PATH=${INTEL_OPENVINO_DIR}/opencv/lib:${INTEL_OPENVINO_DIR}/opencv/share/OpenCV/3rdparty/lib:${LD_LIBRARY_PATH}
 ENV HDDL_INSTALL_DIR=${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/external/hddl
@@ -59,8 +67,8 @@ ENV LANG en_US.UTF-8
 
 
 ARG DEVICE=CPU_FP32
-ARG ONNXRUNTIME_REPO=https://github.com/microsoft/onnxruntime
-ARG ONNXRUNTIME_BRANCH=master
+ARG ONNXRUNTIME_REPO=https://github.com/intel/onnxruntime
+ARG ONNXRUNTIME_BRANCH=openvino-ep-v2
 
 RUN mkdir -p /opt/cmake/bin
 
@@ -70,12 +78,12 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2
     tar -xf cmake-3.13.2-Linux-x86_64.tar.gz --strip 1 -C /opt/cmake && rm -rf /cmake-3.13.2-Linux-x86_64.tar.gz
 
 RUN git clone --recursive -b $ONNXRUNTIME_BRANCH $ONNXRUNTIME_REPO && \
-    sed -i "s/sudo//" /onnxruntime/dockerfiles/scripts/install_common_deps.sh &&\
+   sed -i "s/sudo//" /onnxruntime/dockerfiles/scripts/install_common_deps.sh &&\
     /bin/sh /onnxruntime/dockerfiles/scripts/install_common_deps.sh &&\
-    cd /onnxruntime/cmake/external/onnx && python3 setup.py install 
+    cd /onnxruntime/cmake/external/onnx && python3 setup.py install
 
-RUN cd /onnxruntime && ./build.sh --config RelWithDebInfo --update --build --parallel --use_openvino $DEVICE --build_wheel
+RUN cd /onnxruntime && ./build.sh --config RelWithDebInfo --update --build --parallel --use_openvino $DEVICE --build_wheel --use_full_protobuf
 
-RUN cd /onnxruntime/build/Linux/RelWithDebInfo && pip3 install  dist/*-linux_x86_64.whl
+RUN cd /onnxruntime/build/Linux/RelWithDebInfo && pip3 install  dist/*-linux_x86_64.whl 
 
 RUN pip3 install pytest && locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
