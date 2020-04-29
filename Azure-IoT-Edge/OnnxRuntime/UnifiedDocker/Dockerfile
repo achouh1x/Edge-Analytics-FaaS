@@ -32,7 +32,6 @@ FROM ubuntu:16.04
 RUN apt update && \
     apt -y install python3.5 python3-pip zip x11-apps lsb-core wget cpio sudo libboost-python-dev libpng-dev zlib1g-dev git libnuma1 ocl-icd-libopencl1 clinfo libboost-filesystem1.58.0 libboost-thread1.58.0 protobuf-compiler libprotoc-dev && pip3 install numpy networkx opencv-python pytest cython && locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8 
 
-#Only required for hddl
 RUN apt-get update && \
     apt-get -y install autoconf automake libgtk-3-dev libtool
 
