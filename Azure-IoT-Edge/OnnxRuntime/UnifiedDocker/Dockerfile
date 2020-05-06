@@ -76,5 +76,4 @@ RUN apt update && \
     cd onnxruntime/cmake/external/onnx && python3 setup.py install &&\
     cd ${MY_ROOT}/onnxruntime && ./build.sh --config Release --update --build --parallel --use_openvino $DEVICE --build_wheel --use_full_protobuf &&\
     pip3 install build/Linux/Release/dist/*-linux_x86_64.whl && \
-    cd ${MY_ROOT}/ && rm -rf cmake-3.14.3-Linux-x86_64 onnxruntime && \
-    rm -rf /opt/intel/openvino
+    cd ${MY_ROOT}/ && rm -rf cmake-3.14.3-Linux-x86_64 onnxruntime
