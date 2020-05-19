@@ -50,9 +50,6 @@ ENV LD_LIBRARY_PATH=${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/exte
 ENV LANG en_US.UTF-8
 ENV PATH /opt/cmake/bin:$PATH
 
-RUN mkdir ${MY_ROOT}/apt_key
-COPY GPG-PUB-KEY-INTEL-OPENVINO-2020 ${MY_ROOT}/apt_key/
-
 RUN apt update && \
     apt -y install apt-transport-https ca-certificates python3.5 python3-pip zip x11-apps lsb-core wget cpio sudo libboost-python-dev libpng-dev zlib1g-dev git libnuma1 ocl-icd-libopencl1 clinfo libboost-filesystem1.58.0 libboost-thread1.58.0 protobuf-compiler libprotoc-dev autoconf automake libtool libjson-c-dev && \
     rm -rf /var/lib/apt/lists/* && \
@@ -61,14 +58,15 @@ RUN apt update && \
     wget https://github.com/intel/compute-runtime/releases/download/19.15.12831/intel-igc-opencl_1.0.2-1787_amd64.deb && \
     wget https://github.com/intel/compute-runtime/releases/download/19.15.12831/intel-opencl_19.15.12831_amd64.deb && \
     wget https://github.com/intel/compute-runtime/releases/download/19.15.12831/intel-ocloc_19.15.12831_amd64.deb && \
-    sudo dpkg -i *.deb && rm -rf *.deb && \
+    dpkg -i *.deb && rm -rf *.deb && \
     locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8  && \
     pip3 install cython && \
     mkdir -p /opt/cmake/bin && \
     cd ${MY_ROOT} && \
     wget https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2-Linux-x86_64.tar.gz && \
     tar -xf cmake-3.13.2-Linux-x86_64.tar.gz --strip 1 -C /opt/cmake && rm -rf ${MY_ROOT}/cmake-3.13.2-Linux-x86_64.tar.gz && \
-    apt-key add ${MY_ROOT}/apt_key/GPG-PUB-KEY-INTEL-OPENVINO-2020 && \
+    wget https://apt.repos.intel.com/openvino/2020/GPG-PUB-KEY-INTEL-OPENVINO-2020 && \
+    apt-key add GPG-PUB-KEY-INTEL-OPENVINO-2020 && \
     cd /etc/apt/sources.list.d && \
     echo "deb https://apt.repos.intel.com/openvino/2020 all main">intel-openvino-2020.list && \ 
     apt update && \

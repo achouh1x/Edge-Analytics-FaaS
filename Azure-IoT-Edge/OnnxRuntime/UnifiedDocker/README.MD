@@ -78,7 +78,7 @@
 1. Retrieve your docker image in one of the following ways. 
    - Build the docker image from the DockerFile in this repository.
      ``` 
-      docker build -t onnxruntime-hddl --build-arg DEVICE=VAD-M_FP16 --network host . 
+      docker build -t onnxruntime-vadm --build-arg DEVICE=VAD-M_FP16 --network host . 
      ```
    - Pull the official image from DockerHub.
      ```
@@ -87,7 +87,7 @@
 2. Install the HDDL drivers on the host machine according to the reference in [here](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_linux_ivad_vpu.html)
 3. Run the docker image by mounting the device drivers
     ```
-    docker run -it --mount type=bind,source=/var/tmp,destination=/var/tmp --device /dev/ion:/dev/ion  onnxruntime-hddl:latest
+    docker run -it --mount type=bind,source=/var/tmp,destination=/var/tmp --device /dev/ion:/dev/ion  onnxruntime-vadm:latest
 
     ```
 
