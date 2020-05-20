@@ -32,8 +32,8 @@ FROM ubuntu:16.04
 WORKDIR /code
 ARG MY_ROOT=/code
 ARG DEVICE=CPU_FP32
-ARG ONNXRUNTIME_REPO=https://github.com/microsoft/onnxruntime
-ARG ONNXRUNTIME_BRANCH=master
+ARG ONNXRUNTIME_REPO=https://github.com/intel/onnxruntime
+ARG ONNXRUNTIME_BRANCH=openvino-ep-2020.2-ci
 
 ENV pattern="COMPONENTS=DEFAULTS"
 ENV replacement="COMPONENTS=intel-openvino-ie-sdk-ubuntu-xenial__x86_64;intel-openvino-ie-rt-cpu-ubuntu-xenial__x86_64;intel-openvino-ie-rt-gpu-ubuntu-xenial__x86_64;intel-openvino-ie-rt-vpu-ubuntu-xenial__x86_64;intel-openvino-ie-rt-hddl-ubuntu-xenial__x86_64;intel-openvino-opencv-lib-ubuntu-xenial__x86_64"
@@ -47,6 +47,7 @@ ENV OpenCV_DIR=${INTEL_OPENVINO_DIR}/opencv/share/OpenCV
 ENV LD_LIBRARY_PATH=${INTEL_OPENVINO_DIR}/opencv/lib:${INTEL_OPENVINO_DIR}/opencv/share/OpenCV/3rdparty/lib:${LD_LIBRARY_PATH}
 ENV HDDL_INSTALL_DIR=${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/external/hddl
 ENV LD_LIBRARY_PATH=${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/external/hddl/lib:$LD_LIBRARY_PATH
+
 ENV LANG en_US.UTF-8
 ENV PATH /opt/cmake/bin:$PATH
 
@@ -60,7 +61,7 @@ RUN apt update && \
     wget https://github.com/intel/compute-runtime/releases/download/19.15.12831/intel-ocloc_19.15.12831_amd64.deb && \
     dpkg -i *.deb && rm -rf *.deb && \
     locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8  && \
-    pip3 install cython && \
+    pip3 install cython numpy && \
     mkdir -p /opt/cmake/bin && \
     cd ${MY_ROOT} && \
     wget https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2-Linux-x86_64.tar.gz && \
@@ -75,9 +76,10 @@ RUN apt update && \
     cd ${MY_ROOT} && \
     git clone --recursive -b $ONNXRUNTIME_BRANCH $ONNXRUNTIME_REPO && \
     sed -i "s/sudo//" onnxruntime/dockerfiles/scripts/install_common_deps.sh &&\
-    /bin/sh onnxruntime/dockerfiles/scripts/install_common_deps.sh &&\
-    cd onnxruntime/cmake/external/onnx && python3 setup.py install &&\
+    /bin/sh onnxruntime/dockerfiles/scripts/install_common_deps.sh && \
+    cd onnxruntime/cmake/external/onnx && python3 setup.py install && \
     cd ${MY_ROOT}/onnxruntime && ./build.sh --config Release --update --build --parallel --use_openvino $DEVICE --build_wheel --use_full_protobuf &&\
     pip3 install build/Linux/Release/dist/*-linux_x86_64.whl && \
     cd ${MY_ROOT}/ && rm -rf cmake-3.14.3-Linux-x86_64 onnxruntime && \
     cd ${INTEL_OPENVINO_DIR} && rm -rf documentation && cd deployment_tools/ && rm -rf model_optimizer open_model_zoo demo && cd inference_engine && rm -rf samples
+    
