@@ -3,7 +3,7 @@
 
    Retrieve your docker image in one of the following ways.
 
-    -  For building the docker image, download the public key from https://apt.repos.intel.com/openvino/2020/GPG-PUB-KEY-INTEL-OPENVINO-2020 and save it to a file in the same directory and build the image. Providing the argument DEVICE enables onnxruntime for that particular device.You can also provide arguments ONNXRUNTIME_REPO and ONNXRUNTIME_BRANCH to test that particular repo and branch. Default is https://github.com/microsoft/onnxruntime for repo and master for branch.
+    -  For building the docker image, Provide the argument DEVICE enables onnxruntime for that particular device.You can also provide arguments ONNXRUNTIME_REPO and ONNXRUNTIME_BRANCH to test that particular repo and branch. Default is https://github.com/microsoft/onnxruntime for repo and master for branch.
        ```
        docker build -t onnxruntime --build-arg DEVICE=$DEVICE .
        ```
