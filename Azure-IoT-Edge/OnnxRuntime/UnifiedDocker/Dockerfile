@@ -32,8 +32,8 @@ FROM ubuntu:16.04
 WORKDIR /code
 ARG MY_ROOT=/code
 ARG DEVICE=CPU_FP32
-ARG ONNXRUNTIME_REPO=https://github.com/intel/onnxruntime
-ARG ONNXRUNTIME_BRANCH=openvino-ep-2020.2-ci
+ARG ONNXRUNTIME_REPO=https://github.com/microsoft/onnxruntime
+ARG ONNXRUNTIME_BRANCH=master
 
 ENV pattern="COMPONENTS=DEFAULTS"
 ENV replacement="COMPONENTS=intel-openvino-ie-sdk-ubuntu-xenial__x86_64;intel-openvino-ie-rt-cpu-ubuntu-xenial__x86_64;intel-openvino-ie-rt-gpu-ubuntu-xenial__x86_64;intel-openvino-ie-rt-vpu-ubuntu-xenial__x86_64;intel-openvino-ie-rt-hddl-ubuntu-xenial__x86_64;intel-openvino-opencv-lib-ubuntu-xenial__x86_64"
