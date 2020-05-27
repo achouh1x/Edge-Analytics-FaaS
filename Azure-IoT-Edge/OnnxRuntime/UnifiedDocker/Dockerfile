@@ -52,7 +52,7 @@ ENV PATH /opt/cmake/bin:$PATH
 
 COPY l_openvino_*.tgz .
 RUN apt update && \
-    apt -y install python3.5 python3-pip zip x11-apps lsb-core wget cpio sudo libboost-python-dev libpng-dev zlib1g-dev git libnuma1 ocl-icd-libopencl1 clinfo libboost-filesystem1.58.0 libboost-thread1.58.0 protobuf-compiler libprotoc-dev autoconf automake libtool && \
+    apt -y install python3.5 python3-pip zip x11-apps lsb-core wget cpio sudo libboost-python-dev libpng-dev zlib1g-dev git libnuma1 ocl-icd-libopencl1 clinfo libboost-filesystem1.58.0 libboost-thread1.58.0 protobuf-compiler libprotoc-dev autoconf automake libtool libjson-c-dev && \
     locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8  && \
     pip3 install cython && \
     mkdir -p /opt/cmake/bin && \
@@ -72,6 +72,7 @@ RUN apt update && \
     cd ${MY_ROOT} && \
     git clone --recursive -b $ONNXRUNTIME_BRANCH $ONNXRUNTIME_REPO && \
     sed -i "s/sudo//" onnxruntime/dockerfiles/scripts/install_common_deps.sh &&\
+    sed -i "s/pip/pip3/" onnxruntime/dockerfiles/scripts/install_common_deps.sh &&\
     /bin/sh onnxruntime/dockerfiles/scripts/install_common_deps.sh &&\
     cd onnxruntime/cmake/external/onnx && python3 setup.py install &&\
     cd ${MY_ROOT}/onnxruntime && ./build.sh --config Release --update --build --parallel --use_openvino $DEVICE --build_wheel --use_full_protobuf &&\
