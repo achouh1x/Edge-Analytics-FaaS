@@ -1,9 +1,9 @@
-# Quick-start Docker containers for ONNX Runtime OpenVino EP
+# Quick-start Docker containers for ONNX Runtime
 1. Build the onnxruntime image for all the accelerators supported as below 
 
    Retrieve your docker image in one of the following ways.
 
-    -  For building the docker image, Download OpenVINO **version 2020.2** for Linux targets from [OpenVINO download page](https://software.intel.com/en-us/openvino-toolkit) and copy the openvino tar file in the same directory and build the image. The online installer size is only 16MB and the components needed for the accelerators are mentioned in the dockerfile.Providing the argument device enables onnxruntime for that particular device.You can also provide arguments ONNXRUNTIME_REPO and ONNXRUNTIME_BRANCH to test that particular repo and branch. Default is https://github.com/intel/onnxruntime for repo and preview-v0.8.1 for branch
+    -  For building the docker image, Download OpenVINO **version 2020.2** for Linux targets from [OpenVINO download page](https://software.intel.com/en-us/openvino-toolkit) and copy the openvino tar file in the same directory and build the image. The online installer size is only 16MB and the components needed for the accelerators are mentioned in the dockerfile.Providing the argument device enables onnxruntime for that particular device.You can also provide arguments ONNXRUNTIME_REPO and ONNXRUNTIME_BRANCH to test that particular repo and branch. Default is https://github.com/microsoft/onnxruntime for repo and master for branch
        ```
        docker build -t onnxruntime --build-arg DEVICE=$DEVICE .
        ```
@@ -73,12 +73,12 @@
     docker run -it --network host --privileged -v /dev:/dev  onnxruntime-myriad:latest
 
     ```
-## VAD-R Accelerator Version 
+## VAD-M Accelerator Version 
 
 1. Retrieve your docker image in one of the following ways. 
    - Build the docker image from the DockerFile in this repository.
      ``` 
-      docker build -t onnxruntime-vadr --build-arg DEVICE=VAD-R_FP16 --network host . 
+      docker build -t onnxruntime-vadm --build-arg DEVICE=VAD-M_FP16 --network host . 
      ```
    - Pull the official image from DockerHub.
      ```
@@ -87,7 +87,7 @@
 2. Install the HDDL drivers on the host machine according to the reference in [here](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_linux_ivad_vpu.html)
 3. Run the docker image by mounting the device drivers
     ```
-    docker run -it --device --mount type=bind,source=/var/tmp,destination=/var/tmp --device /dev/ion:/dev/ion  onnxruntime-hddl:latest
+    docker run -it --mount type=bind,source=/var/tmp,destination=/var/tmp --device /dev/ion:/dev/ion  onnxruntime-vadm:latest
 
     ```
 
