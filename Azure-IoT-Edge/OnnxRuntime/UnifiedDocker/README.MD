@@ -20,7 +20,7 @@
 	| <code>GPU_FP32</code> |Intel<sup></sup> Integrated Graphics |
 	| <code>GPU_FP16</code> | Intel<sup></sup> Integrated Graphics |
 	| <code>MYRIAD_FP16</code> | Intel<sup></sup> Movidius<sup>TM</sup> USB sticks |
-	| <code>VAD-R_FP16</code> | Intel<sup></sup> Vision Accelerator Design based on Movidius<sup>TM</sup> MyriadX VPUs |
+	| <code>VAD-M_FP16</code> | Intel<sup></sup> Vision Accelerator Design based on Movidius<sup>TM</sup> MyriadX VPUs |
 
 ## CPU Version 
 
@@ -92,11 +92,14 @@
     ```
 
 ## Choose hardware target dynamically
-The target hardware selected during Docker build stage forms the Default hardware target. This value however can be overriden with a different target at runtime by calling the corresponding APIs from the application. Refer to this [Dynamic device selection API documentation](https://github.com/intel/onnxruntime/blob/openvino-ep-v2/docs/execution_providers/OpenVINO-ExecutionProvider.md#dynamic-device-selection) for more detail
+The target hardware selected during Docker build stage forms the Default hardware target. This value however can be overriden with a different target at runtime by calling the corresponding APIs from the application. Refer to this [Dynamic device selection API documentation](https://github.com/intel/onnxruntime/blob/openvino-ep-v2/docs/execution_providers/OpenVINO-ExecutionProvider.md#dynamic-device-selection) for more details.
+
+## Minify Docker Containers
+You can minify and secure your docker containers using docker-slim. It is free and open source. Docker slim will analyse your image, understands what it needs and remove all others. Also you can set flags like --include-path to make sure everything your application needs is included. Refer [docker-slim](https://github.com/docker-slim/docker-slim) for more details.
 
 ### Azure IOt Edge with ONNX Runtime-OpenvinoEP
 
-1 Deploy these image through Azure IOT Edge with the docker file Dockerfile.iot. The base image can be onnxruntime-cpu/gpu/vadr based on the accelerator selected. Please edit the Docker file to change base image name that was built for the accelerator.
+1 Deploy these image through Azure IOT Edge with the docker file Dockerfile.iot. The base image can be onnxruntime-cpu/gpu/vadm based on the accelerator selected. Please edit the Docker file to change base image name that was built for the accelerator.
 
    - Build the docker image from the DockerFile in this repository.
      ``` 
