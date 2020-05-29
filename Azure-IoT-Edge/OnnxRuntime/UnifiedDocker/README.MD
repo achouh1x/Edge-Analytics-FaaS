@@ -84,7 +84,7 @@
      ```
       # Will be available soon
      ```
-2. Install the HDDL drivers on the host machine according to the reference in [here](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_linux_ivad_vpu.html)
+2. Install the drivers on the host machine according to the reference in [here](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_linux_ivad_vpu.html)
 3. Run the docker image by mounting the device drivers
     ```
     docker run -it --mount type=bind,source=/var/tmp,destination=/var/tmp --device /dev/ion:/dev/ion  onnxruntime-vadm:latest
@@ -117,7 +117,7 @@ You can minify and secure your docker containers using docker-slim. It is free a
 
    - In the Container Create Options please replace as below
 
-     FOR HDDL,
+     FOR VAD-M,
   
       ```
       {
