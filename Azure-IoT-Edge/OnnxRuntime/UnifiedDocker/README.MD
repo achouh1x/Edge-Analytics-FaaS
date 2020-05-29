@@ -1,9 +1,9 @@
-# Quick-start Docker containers for ONNX Runtime OpenVino EP
+# Quick-start Docker containers for ONNX Runtime
 1. Build the onnxruntime image for all the accelerators supported as below 
 
    Retrieve your docker image in one of the following ways.
 
-    -  For building the docker image, Download OpenVINO **version 2020.2** for Linux targets from [OpenVINO download page](https://software.intel.com/en-us/openvino-toolkit) and copy the openvino tar file in the same directory and build the image. The online installer size is only 16MB and the components needed for the accelerators are mentioned in the dockerfile.Providing the argument device enables onnxruntime for that particular device.You can also provide arguments ONNXRUNTIME_REPO and ONNXRUNTIME_BRANCH to test that particular repo and branch. Default is https://github.com/intel/onnxruntime for repo and preview-v0.8.1 for branch
+    -  For building the docker image, Provide the argument DEVICE enables onnxruntime for that particular device.You can also provide arguments ONNXRUNTIME_REPO and ONNXRUNTIME_BRANCH to test that particular repo and branch. Default is https://github.com/microsoft/onnxruntime for repo and master for branch.
        ```
        docker build -t onnxruntime --build-arg DEVICE=$DEVICE .
        ```
@@ -73,30 +73,53 @@
     docker run -it --network host --privileged -v /dev:/dev  onnxruntime-myriad:latest
 
     ```
-## VAD-R Accelerator Version 
+## VAD-M Accelerator Version 
 
 1. Retrieve your docker image in one of the following ways. 
    - Build the docker image from the DockerFile in this repository.
      ``` 
-      docker build -t onnxruntime-vadr --build-arg DEVICE=VAD-R_FP16 --network host . 
+      docker build -t onnxruntime-vadm --build-arg DEVICE=VAD-M_FP16 --network host . 
      ```
    - Pull the official image from DockerHub.
      ```
       # Will be available soon
      ```
-2. Install the HDDL drivers on the host machine according to the reference in [here](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_linux_ivad_vpu.html)
+2. Install the drivers on the host machine according to the reference in [here](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_linux_ivad_vpu.html)
 3. Run the docker image by mounting the device drivers
     ```
-    docker run -it --device --mount type=bind,source=/var/tmp,destination=/var/tmp --device /dev/ion:/dev/ion  onnxruntime-hddl:latest
+    docker run -it --mount type=bind,source=/var/tmp,destination=/var/tmp --device /dev/ion:/dev/ion  onnxruntime-vadm:latest
+
+    ```
+
+## FPGA Accelerator Version 
+
+1. Setup FPGA on host machine. Refer [here](https://docs.openvinotoolkit.org/latest/_docs_install_guides_PAC_Configure.html) for details.
+2. Make sure that the command `aocl diagnose` give DIAGNOSTIC PASSED.
+3. Retrieve your docker image in one of the following ways. 
+   - Build the docker image from the DockerFile.fpga in this repository.
+     ``` 
+      docker build -t onnxruntime-fpga -f Dockerfile.fpga --network host .  
+     ```
+   - Pull the official image from DockerHub.
+     ```
+      # Will be available soon
+     ```
+
+3. Run the docker image (update the command with your kernal version)
+    ```
+    docker run --rm -it --net=host --cap-add=ALL --privileged --mount type=bind,source=/opt/altera,destination=/opt/altera --mount type=bind,source=/etc/OpenCL/vendors,destination=/etc/OpenCL/vendors --mount type=bind,source=/opt/Intel/OpenCL/Boards,destination=/opt/Intel/OpenCL/Boards --mount type=bind,source=/lib/modules/4.15.0-99-generic,destination=/lib/modules/4.15.0-99-generic --mount type=bind,source=/lib/modules/4.15.0-96-generic/build,destination=/lib/modules/4.15.0-96-generic/build --mount type=bind,source=/usr/src/kernels/4.15.0-96-generic/,destination=/usr/src/linux-headers-4.15.0-96-generic --mount type=bind,source=/sbin/,destination=/sbin/ --mount type=bind,source=/opt/intel/openvino_fpga_2020.2.120/deployment_tools/inference_engine/lib/intel64/,destination=/opt/intel/openvino_fpga_2020.2.120/deployment_tools/inference_engine/lib/intel64/ -v /bin/kmod/:/bin/kmod/ -v /usr/src/:/usr/src/ -v /opt/intel/openvino/bitstreams/:/opt/intel/openvino/bitstreams/ -v /usr/bin/:/usr/bin/ -v /etc/udev/:/etc/udev/ -v /dev/:/dev/ --device /dev/:/dev/ onnxruntime-fpga:latest
 
     ```
 
 ## Choose hardware target dynamically
-The target hardware selected during Docker build stage forms the Default hardware target. This value however can be overriden with a different target at runtime by calling the corresponding APIs from the application. Refer to this [Dynamic device selection API documentation](https://github.com/intel/onnxruntime/blob/openvino-ep-v2/docs/execution_providers/OpenVINO-ExecutionProvider.md#dynamic-device-selection) for more detail
+The target hardware selected during Docker build stage forms the Default hardware target. This value however can be overriden with a different target at runtime by calling the corresponding APIs from the application. Refer to this [Dynamic device selection API documentation](https://github.com/intel/onnxruntime/blob/openvino-ep-v2/docs/execution_providers/OpenVINO-ExecutionProvider.md#dynamic-device-selection) for more details.
 
-### Azure IOt Edge with ONNX Runtime-OpenvinoEP
+## Minify Docker Containers
+You can minify and secure your docker containers using docker-slim. It is free and open source. Docker slim will analyse your image, understands what it needs and remove all others. Also you can set flags like `--include-path` to make sure everything your application needs is included. Refer [docker-slim](https://github.com/docker-slim/docker-slim) for more details.
 
-1 Deploy these image through Azure IOT Edge with the docker file Dockerfile.iot. The base image can be onnxruntime-cpu/gpu/vadr based on the accelerator selected. Please edit the Docker file to change base image name that was built for the accelerator.
+## Azure IOt Edge with ONNX Runtime-OpenvinoEP
+
+1 Deploy these image through Azure IOT Edge with the docker file Dockerfile.iot. The base image can be onnxruntime-cpu/gpu/vadm based on the accelerator selected. Please edit the Docker file to change base image name that was built for the accelerator.
 
    - Build the docker image from the DockerFile in this repository.
      ``` 
@@ -114,7 +137,7 @@ The target hardware selected during Docker build stage forms the Default hardwar
 
    - In the Container Create Options please replace as below
 
-     FOR HDDL,
+     FOR VAD-M,
   
       ```
       {
