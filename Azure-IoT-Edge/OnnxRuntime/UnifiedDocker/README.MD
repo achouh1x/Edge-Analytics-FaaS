@@ -21,7 +21,6 @@
 	| <code>GPU_FP16</code> | Intel<sup></sup> Integrated Graphics |
 	| <code>MYRIAD_FP16</code> | Intel<sup></sup> Movidius<sup>TM</sup> USB sticks |
 	| <code>VAD-M_FP16</code> | Intel<sup></sup> Vision Accelerator Design based on Movidius<sup>TM</sup> MyriadX VPUs |
-  | <code>VAD-F_FP32</code> | Intel<sup></sup> FPGAs |
 
 ## CPU Version 
 
