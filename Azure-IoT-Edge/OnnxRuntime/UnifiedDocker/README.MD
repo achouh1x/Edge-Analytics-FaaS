@@ -21,6 +21,7 @@
 	| <code>GPU_FP16</code> | Intel<sup></sup> Integrated Graphics |
 	| <code>MYRIAD_FP16</code> | Intel<sup></sup> Movidius<sup>TM</sup> USB sticks |
 	| <code>VAD-M_FP16</code> | Intel<sup></sup> Vision Accelerator Design based on Movidius<sup>TM</sup> MyriadX VPUs |
+  | <code>VAD-F_FP32</code> | Intel<sup></sup> FPGAs |
 
 ## CPU Version 
 
@@ -107,8 +108,7 @@
 
 3. Run the docker image (update the command with your kernal version)
     ```
-    docker run --rm -it --net=host --cap-add=ALL --privileged --mount type=bind,source=/opt/altera,destination=/opt/altera --mount type=bind,source=/etc/OpenCL/vendors,destination=/etc/OpenCL/vendors --mount type=bind,source=/opt/Intel/OpenCL/Boards,destination=/opt/Intel/OpenCL/Boards --mount type=bind,source=/lib/modules/4.15.0-99-generic,destination=/lib/modules/4.15.0-99-generic --mount type=bind,source=/lib/modules/4.15.0-96-generic/build,destination=/lib/modules/4.15.0-96-generic/build --mount type=bind,source=/usr/src/kernels/4.15.0-96-generic/,destination=/usr/src/linux-headers-4.15.0-96-generic --mount type=bind,source=/sbin/,destination=/sbin/ --mount type=bind,source=/opt/intel/openvino_fpga_2020.2.120/deployment_tools/inference_engine/lib/intel64/,destination=/opt/intel/openvino_fpga_2020.2.120/deployment_tools/inference_engine/lib/intel64/ -v /bin/kmod/:/bin/kmod/ -v /usr/src/:/usr/src/ -v /opt/intel/openvino/bitstreams/:/opt/intel/openvino/bitstreams/ -v /usr/bin/:/usr/bin/ -v /etc/udev/:/etc/udev/ -v /dev/:/dev/ --device /dev/:/dev/ onnxruntime-fpga:latest
-
+    docker run --rm -it --net=host --privileged --mount type=bind,source=/opt/altera,destination=/opt/altera --mount type=bind,source=/opt/Intel/OpenCL/Boards,destination=/opt/Intel/OpenCL/Boards --mount type=bind,source=/usr/src/kernels/4.15.0-96-generic/,destination=/usr/src/linux-headers-4.15.0-96-generic --mount type=bind,source=/opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/,destination=/opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/ -v /opt/intel/openvino/bitstreams/:/opt/intel/openvino/bitstreams/ -v /etc/udev/:/etc/udev/ --device /dev/:/dev/ onnxruntime-fpga:latest
     ```
 
 ## Choose hardware target dynamically

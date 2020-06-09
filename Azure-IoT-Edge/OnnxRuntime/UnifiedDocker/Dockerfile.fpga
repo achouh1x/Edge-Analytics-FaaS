@@ -45,7 +45,6 @@ ENV LD_LIBRARY_PATH=${INTEL_OPENVINO_DIR}/opencv/lib:${INTEL_OPENVINO_DIR}/openc
 
 ENV AOCL_BOARD_PACKAGE_ROOT=${INTEL_OPENVINO_DIR}/bitstreams/a10_vision_design_sg2_bitstreams/BSP/a10_1150_sg2
 ENV IOCL_BOARD_PACKAGE_ROOT=${INTEL_OPENVINO_DIR}/bitstreams/a10_vision_design_sg2_bitstreams/BSP/a10_1150_sg2
-#ENV QUARTUS_DIR=/home/ieisw/intelFPGA/18.1/qprogrammer
 ENV INTELFPGAOCLSDKROOT=/opt/altera/aocl-pro-rte/aclrte-linux64
 ENV ALTERAOCLSDKROOT=/opt/altera/aocl-pro-rte/aclrte-linux64
 ENV PATH=$PATH:/opt/altera/aocl-pro-rte/aclrte-linux64/bin:/opt/altera/aocl-pro-rte/aclrte-linux64/host/linux64/bin:/home/ieisw/intelFPGA/18.1/qprogrammer/bin
