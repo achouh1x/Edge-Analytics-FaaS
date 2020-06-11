@@ -3,9 +3,13 @@
 
    Retrieve your docker image in one of the following ways.
 
-    -  For building the docker image, Provide the argument DEVICE enables onnxruntime for that particular device.You can also provide arguments ONNXRUNTIME_REPO and ONNXRUNTIME_BRANCH to test that particular repo and branch. Default is https://github.com/microsoft/onnxruntime for repo and master for branch.
+    -  For building the docker image, provide the argument DEVICE which enables onnxruntime for that particular device. For FPGA, you can use the specific dockerfile and no need to pass the DEVICE argument. You can also provide arguments ONNXRUNTIME_REPO and ONNXRUNTIME_BRANCH to test that particular repo and branch. Default is https://github.com/microsoft/onnxruntime for repo and master for branch.
        ```
        docker build -t onnxruntime --build-arg DEVICE=$DEVICE .
+       ```
+      For FPGA,
+      ```
+       docker build -t onnxruntime -f Dockerfile.fpga .
        ```
     - Pull the official image from DockerHub.
        ```
@@ -21,7 +25,7 @@
 	| <code>GPU_FP16</code> | Intel<sup></sup> Integrated Graphics |
 	| <code>MYRIAD_FP16</code> | Intel<sup></sup> Movidius<sup>TM</sup> USB sticks |
 	| <code>VAD-M_FP16</code> | Intel<sup></sup> Vision Accelerator Design based on Movidius<sup>TM</sup> MyriadX VPUs |
-
+  Note: Since there is specific dockerfile for FPGA, no need to pass VAD-F_FP32 as DEVICE. 
 ## CPU Version 
 
 1. Retrieve your docker image in one of the following ways.
@@ -71,7 +75,6 @@
 3. Run the docker image by mounting the device drivers
     ```
     docker run -it --network host --privileged -v /dev:/dev  onnxruntime-myriad:latest
-
     ```
 ## VAD-M Accelerator Version 
 
@@ -88,13 +91,16 @@
 3. Run the docker image by mounting the device drivers
     ```
     docker run -it --mount type=bind,source=/var/tmp,destination=/var/tmp --device /dev/ion:/dev/ion  onnxruntime-vadm:latest
-
     ```
 
 ## FPGA Accelerator Version 
 
-1. Setup FPGA on host machine. Refer [here](https://docs.openvinotoolkit.org/latest/_docs_install_guides_PAC_Configure.html) for details.
-2. Make sure that the command `aocl diagnose` give DIAGNOSTIC PASSED.
+1. Setup FPGA on host machine. Refer [here](https://docs.openvinotoolkit.org/2020.2/_docs_install_guides_VisionAcceleratorFPGA_Configure.html) for details.
+2. To test if FPGA card was installed succesfully run aocl diagnose:
+    ```
+    aocl diagnose
+    ```
+   You should see DIAGNOSTIC_PASSED before proceeding to the next steps.
 3. Retrieve your docker image in one of the following ways. 
    - Build the docker image from the DockerFile.fpga in this repository.
      ``` 
@@ -105,7 +111,7 @@
       # Will be available soon
      ```
 
-3. Run the docker image (update the command with your kernal version)
+4. Run the docker image (Update the command with your kernal version. Tested successfully for 4.15.0-96-generic and and 4.15.0-99-generic)
     ```
     docker run --rm -it --net=host --privileged --mount type=bind,source=/opt/altera,destination=/opt/altera --mount type=bind,source=/opt/Intel/OpenCL/Boards,destination=/opt/Intel/OpenCL/Boards --mount type=bind,source=/usr/src/kernels/4.15.0-96-generic/,destination=/usr/src/linux-headers-4.15.0-96-generic --mount type=bind,source=/opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/,destination=/opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/ -v /opt/intel/openvino/bitstreams/:/opt/intel/openvino/bitstreams/ -v /etc/udev/:/etc/udev/ --device /dev/:/dev/ onnxruntime-fpga:latest
     ```
