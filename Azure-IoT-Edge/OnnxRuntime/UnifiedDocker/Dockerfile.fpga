@@ -65,7 +65,6 @@ ENV LC_ALL C
 ARG DEVICE=VAD-F_FP32
 ARG ONNXRUNTIME_REPO=https://github.com/microsoft/onnxruntime
 ARG ONNXRUNTIME_BRANCH=master
-#openvino-ep-2020.2-ci
 
 COPY l_openvino_*.tgz .
 
