@@ -7,7 +7,7 @@
        ```
        docker build -t onnxruntime --build-arg DEVICE=$DEVICE .
        ```
-      For FPGA,
+        For FPGA
       ```
        docker build -t onnxruntime -f Dockerfile.fpga .
        ```
@@ -25,7 +25,7 @@
 	| <code>GPU_FP16</code> | Intel<sup></sup> Integrated Graphics |
 	| <code>MYRIAD_FP16</code> | Intel<sup></sup> Movidius<sup>TM</sup> USB sticks |
 	| <code>VAD-M_FP16</code> | Intel<sup></sup> Vision Accelerator Design based on Movidius<sup>TM</sup> MyriadX VPUs |
-  Note: Since there is specific dockerfile for FPGA, no need to pass VAD-F_FP32 as DEVICE. 
+    Note: Since there is specific dockerfile for FPGA, no need to pass VAD-F_FP32 as DEVICE. 
 ## CPU Version 
 
 1. Retrieve your docker image in one of the following ways.
