@@ -3,15 +3,10 @@
 
    Retrieve your docker image in one of the following ways.
 
-    -  For building the docker image, provide the argument DEVICE which enables onnxruntime for that particular device. For FPGA, you can use the specific dockerfile and no need to pass the DEVICE argument. You can also provide arguments ONNXRUNTIME_REPO and ONNXRUNTIME_BRANCH to test that particular repo and branch. Default is https://github.com/microsoft/onnxruntime for repo and master for branch.
+    -  For building the docker image, provide the argument DEVICE which enables onnxruntime for that particular device. For FPGA, you can specify the dockerfile.fpga with -f tag and no need to pass the DEVICE argument. You can also provide arguments ONNXRUNTIME_REPO and ONNXRUNTIME_BRANCH to test that particular repo and branch. Default is https://github.com/microsoft/onnxruntime for repo and master for branch.
        ```
        docker build -t onnxruntime --build-arg DEVICE=$DEVICE .
-       ```
-      For FPGA
-      
-       ```docker build -t onnxruntime -f Dockerfile.fpga .
-       ```
-      
+       ``` 
     -  Pull the official image from DockerHub.
        ```
      	# Will be available with next release
@@ -26,7 +21,7 @@
 	| <code>GPU_FP16</code> | Intel<sup></sup> Integrated Graphics |
 	| <code>MYRIAD_FP16</code> | Intel<sup></sup> Movidius<sup>TM</sup> USB sticks |
 	| <code>VAD-M_FP16</code> | Intel<sup></sup> Vision Accelerator Design based on Movidius<sup>TM</sup> MyriadX VPUs |
-  Note: Since there is specific dockerfile for FPGA, no need to pass VAD-F_FP32 as DEVICE. 
+  Note: Since there is a specific dockerfile for FPGA, no need to pass VAD-F_FP32 as DEVICE. 
 ## CPU Version 
 
 1. Retrieve your docker image in one of the following ways.
