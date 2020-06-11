@@ -90,14 +90,14 @@
     ```
 
 ## FPGA Accelerator Version 
-
-1. Setup FPGA on host machine. Refer [here](https://docs.openvinotoolkit.org/2020.2/_docs_install_guides_VisionAcceleratorFPGA_Configure.html) for details.
-2. To test if FPGA card was installed succesfully run aocl diagnose:
+1. Download OpenVINO version 2020.2 for Linux targets with FPGA support from [here](https://software.intel.com/content/www/us/en/develop/tools/openvino-toolkit.html) and copy the openvino tar file in the same directory of dockerfile.fpga.
+2. Setup FPGA on host machine. Refer [here](https://docs.openvinotoolkit.org/2020.2/_docs_install_guides_VisionAcceleratorFPGA_Configure.html) for details.
+3. To test if FPGA card was installed succesfully run aocl diagnose:
     ```
     aocl diagnose
     ```
    You should see DIAGNOSTIC_PASSED before proceeding to the next steps.
-3. Retrieve your docker image in one of the following ways. 
+4. Retrieve your docker image in one of the following ways. 
    - Build the docker image from the DockerFile.fpga in this repository.
      ``` 
       docker build -t onnxruntime-fpga -f Dockerfile.fpga --network host .  
@@ -107,7 +107,7 @@
       # Will be available soon
      ```
 
-4. Run the docker image (Update the command with your kernal version. Tested successfully for 4.15.0-96-generic and and 4.15.0-99-generic)
+5. Run the docker image (Update the command with your kernal version. Tested successfully for 4.15.0-96-generic and and 4.15.0-99-generic)
     ```
     docker run --rm -it --net=host --privileged --mount type=bind,source=/opt/altera,destination=/opt/altera --mount type=bind,source=/opt/Intel/OpenCL/Boards,destination=/opt/Intel/OpenCL/Boards --mount type=bind,source=/usr/src/kernels/4.15.0-96-generic/,destination=/usr/src/linux-headers-4.15.0-96-generic --mount type=bind,source=/opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/,destination=/opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/ -v /opt/intel/openvino/bitstreams/:/opt/intel/openvino/bitstreams/ -v /etc/udev/:/etc/udev/ --device /dev/:/dev/ onnxruntime-fpga:latest
     ```
