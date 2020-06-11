@@ -8,9 +8,9 @@
        docker build -t onnxruntime --build-arg DEVICE=$DEVICE .
        ```
     For FPGA
-      ```
-       docker build -t onnxruntime -f Dockerfile.fpga .
-       ```
+      
+       `docker build -t onnxruntime -f Dockerfile.fpga .`
+      
 
     -  Pull the official image from DockerHub.
        ```
