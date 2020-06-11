@@ -11,7 +11,8 @@
       ```
        docker build -t onnxruntime -f Dockerfile.fpga .
        ```
-    - Pull the official image from DockerHub.
+
+    -  Pull the official image from DockerHub.
        ```
      	# Will be available with next release
        ```   
