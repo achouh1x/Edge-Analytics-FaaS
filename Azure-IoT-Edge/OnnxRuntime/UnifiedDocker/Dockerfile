@@ -61,7 +61,7 @@ RUN apt update && \
     wget https://github.com/intel/compute-runtime/releases/download/19.15.12831/intel-ocloc_19.15.12831_amd64.deb && \
     dpkg -i *.deb && rm -rf *.deb && \
     locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8  && \
-    pip3 install cython numpy && \
+    pip3 install cython numpy==1.18.4 && \
     mkdir -p /opt/cmake/bin && \
     cd ${MY_ROOT} && \
     wget https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2-Linux-x86_64.tar.gz && \
