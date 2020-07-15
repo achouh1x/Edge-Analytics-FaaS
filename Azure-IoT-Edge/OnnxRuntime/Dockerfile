@@ -37,6 +37,8 @@ RUN mkdir -p /opt/cmake/bin
 
 ENV PATH /opt/cmake/bin:$PATH
 ENV LANG en_US.UTF-8
+RUN apt update && \
+    apt -y install autoconf automake libtool libjson-c-dev
 RUN wget https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2-Linux-x86_64.tar.gz && \
     tar -xf cmake-3.13.2-Linux-x86_64.tar.gz --strip 1 -C /opt/cmake && rm -rf /cmake-3.13.2-Linux-x86_64.tar.gz
 
@@ -45,7 +47,7 @@ RUN git clone --recursive -b $ONNXRUNTIME_BRANCH $ONNXRUNTIME_REPO && \
     /bin/sh /onnxruntime/dockerfiles/scripts/install_common_deps.sh &&\
     cd /onnxruntime/cmake/external/onnx && python3 setup.py install 
 
-RUN cd /onnxruntime && ./build.sh --config RelWithDebInfo --update --build --parallel --use_openvino $DEVICE --build_wheel
+RUN cd /onnxruntime && ./build.sh --config RelWithDebInfo --update --build --parallel --use_openvino $DEVICE --build_wheel 
 
 RUN cd /onnxruntime/build/Linux/RelWithDebInfo && pip3 install  dist/*-linux_x86_64.whl
 
