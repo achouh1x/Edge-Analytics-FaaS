@@ -3,11 +3,11 @@
 
    Retrieve your docker image in one of the following ways.
 
-    -  For building the docker image, Provide the argument DEVICE enables onnxruntime for that particular device.You can also provide arguments ONNXRUNTIME_REPO and ONNXRUNTIME_BRANCH to test that particular repo and branch. Default is https://github.com/microsoft/onnxruntime for repo and master for branch.
+    -  For building the docker image, provide the argument DEVICE which enables onnxruntime for that particular device. For FPGA, you can specify the dockerfile.fpga with -f tag and no need to pass the DEVICE argument. You can also provide arguments ONNXRUNTIME_REPO, ONNXRUNTIME_BRANCH to test that particular repo and branch and also UBUNTU_VERSION. Default is https://github.com/microsoft/onnxruntime for repo, master for branch and 16.04 for ubuntu version, can build for ubuntu version 18.04 also.
        ```
        docker build -t onnxruntime --build-arg DEVICE=$DEVICE .
-       ```
-    - Pull the official image from DockerHub.
+       ``` 
+    -  Pull the official image from DockerHub.
        ```
      	# Will be available with next release
        ```   
@@ -21,7 +21,7 @@
 	| <code>GPU_FP16</code> | Intel<sup></sup> Integrated Graphics |
 	| <code>MYRIAD_FP16</code> | Intel<sup></sup> Movidius<sup>TM</sup> USB sticks |
 	| <code>VAD-M_FP16</code> | Intel<sup></sup> Vision Accelerator Design based on Movidius<sup>TM</sup> MyriadX VPUs |
-
+  Note: Since there is a specific dockerfile for FPGA, no need to pass VAD-F_FP32 as DEVICE. 
 ## CPU Version 
 
 1. Retrieve your docker image in one of the following ways.
@@ -71,7 +71,6 @@
 3. Run the docker image by mounting the device drivers
     ```
     docker run -it --network host --privileged -v /dev:/dev  onnxruntime-myriad:latest
-
     ```
 ## VAD-M Accelerator Version 
 
@@ -88,14 +87,17 @@
 3. Run the docker image by mounting the device drivers
     ```
     docker run -it --mount type=bind,source=/var/tmp,destination=/var/tmp --device /dev/ion:/dev/ion  onnxruntime-vadm:latest
-
     ```
 
 ## FPGA Accelerator Version 
-
-1. Setup FPGA on host machine. Refer [here](https://docs.openvinotoolkit.org/latest/_docs_install_guides_PAC_Configure.html) for details.
-2. Make sure that the command `aocl diagnose` give DIAGNOSTIC PASSED.
-3. Retrieve your docker image in one of the following ways. 
+1. Download OpenVINO version 2020.3 for Linux targets with FPGA support from [here](https://software.intel.com/content/www/us/en/develop/tools/openvino-toolkit.html) and copy the openvino tar file in the same directory of dockerfile.fpga. The online installer size is only 19MB and the components needed for the accelerator are mentioned in the dockerfile.
+2. Setup FPGA on host machine. Refer [here](https://docs.openvinotoolkit.org/2020.3/_docs_install_guides_VisionAcceleratorFPGA_Configure.html) for details.
+3. To test if FPGA card was installed succesfully run aocl diagnose:
+    ```
+    aocl diagnose
+    ```
+   You should see DIAGNOSTIC_PASSED before proceeding to the next steps.
+4. Retrieve your docker image in one of the following ways. 
    - Build the docker image from the DockerFile.fpga in this repository.
      ``` 
       docker build -t onnxruntime-fpga -f Dockerfile.fpga --network host .  
@@ -105,10 +107,9 @@
       # Will be available soon
      ```
 
-3. Run the docker image (update the command with your kernal version)
+5. Run the docker image (Update the command with your kernal version. Tested successfully for 4.15.0-96-generic and and 4.15.0-99-generic)
     ```
-    docker run --rm -it --net=host --cap-add=ALL --privileged --mount type=bind,source=/opt/altera,destination=/opt/altera --mount type=bind,source=/etc/OpenCL/vendors,destination=/etc/OpenCL/vendors --mount type=bind,source=/opt/Intel/OpenCL/Boards,destination=/opt/Intel/OpenCL/Boards --mount type=bind,source=/lib/modules/4.15.0-99-generic,destination=/lib/modules/4.15.0-99-generic --mount type=bind,source=/lib/modules/4.15.0-96-generic/build,destination=/lib/modules/4.15.0-96-generic/build --mount type=bind,source=/usr/src/kernels/4.15.0-96-generic/,destination=/usr/src/linux-headers-4.15.0-96-generic --mount type=bind,source=/sbin/,destination=/sbin/ --mount type=bind,source=/opt/intel/openvino_fpga_2020.2.120/deployment_tools/inference_engine/lib/intel64/,destination=/opt/intel/openvino_fpga_2020.2.120/deployment_tools/inference_engine/lib/intel64/ -v /bin/kmod/:/bin/kmod/ -v /usr/src/:/usr/src/ -v /opt/intel/openvino/bitstreams/:/opt/intel/openvino/bitstreams/ -v /usr/bin/:/usr/bin/ -v /etc/udev/:/etc/udev/ -v /dev/:/dev/ --device /dev/:/dev/ onnxruntime-fpga:latest
-
+    docker run --rm -it --net=host --privileged --mount type=bind,source=/opt/altera,destination=/opt/altera --mount type=bind,source=/opt/Intel/OpenCL/Boards,destination=/opt/Intel/OpenCL/Boards --mount type=bind,source=/usr/src/kernels/4.15.0-96-generic/,destination=/usr/src/linux-headers-4.15.0-96-generic --mount type=bind,source=/opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/,destination=/opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/ -v /opt/intel/openvino/bitstreams/:/opt/intel/openvino/bitstreams/ -v /etc/udev/:/etc/udev/ --device /dev/:/dev/ onnxruntime-fpga:latest
     ```
 
 ## Choose hardware target dynamically
@@ -174,5 +175,3 @@ You can minify and secure your docker containers using docker-slim. It is free a
 	   }
 	 }
        ```
-	
-
