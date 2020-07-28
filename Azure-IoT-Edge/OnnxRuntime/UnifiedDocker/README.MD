@@ -3,7 +3,7 @@
 
    Retrieve your docker image in one of the following ways.
 
-    -  For building the docker image, provide the argument DEVICE which enables onnxruntime for that particular device. For FPGA, you can specify the dockerfile.fpga with -f tag and no need to pass the DEVICE argument. You can also provide arguments ONNXRUNTIME_REPO, ONNXRUNTIME_BRANCH to test that particular repo and branch and also UBUNTU_VERSION. Default is https://github.com/microsoft/onnxruntime for repo, master for branch and 16.04 for ubuntu version, can build for ubuntu version 18.04 also.
+    -  For building the docker image, provide the argument DEVICE which enables onnxruntime for that particular device. For FPGA, you can specify the dockerfile.fpga with -f tag and no need to pass the DEVICE argument. You can also provide arguments ONNXRUNTIME_REPO, ONNXRUNTIME_BRANCH to test that particular repo and branch and also UBUNTU_VERSION and OV_VERSION. Default is https://github.com/microsoft/onnxruntime for repo, master for branch, 16.04 for ubuntu version and 2020.3.194 for ov version, can build for ubuntu version 18.04 and ov version 2020.4.287 also.
        ```
        docker build -t onnxruntime --build-arg DEVICE=$DEVICE .
        ``` 
