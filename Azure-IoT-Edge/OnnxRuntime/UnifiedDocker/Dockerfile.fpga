@@ -47,7 +47,7 @@ ENV AOCL_BOARD_PACKAGE_ROOT=${INTEL_OPENVINO_DIR}/bitstreams/a10_vision_design_s
 ENV IOCL_BOARD_PACKAGE_ROOT=${INTEL_OPENVINO_DIR}/bitstreams/a10_vision_design_sg2_bitstreams/BSP/a10_1150_sg2
 ENV INTELFPGAOCLSDKROOT=/opt/altera/aocl-pro-rte/aclrte-linux64
 ENV ALTERAOCLSDKROOT=/opt/altera/aocl-pro-rte/aclrte-linux64
-ENV PATH=$PATH:/opt/altera/aocl-pro-rte/aclrte-linux64/bin:/opt/altera/aocl-pro-rte/aclrte-linux64/host/linux64/bin:/home/ieisw/intelFPGA/20.2/hld/bin:/root/intelFPGA_pro/20.2/hld/host/linux64/bin:/home/ieisw/intelFPGA/18.1/qprogrammer/bin
+ENV PATH=$PATH:/opt/altera/aocl-pro-rte/aclrte-linux64/bin:/opt/altera/aocl-pro-rte/aclrte-linux64/host/linux64/bin:${home}/intelFPGA/20.2/hld/bin:/root/intelFPGA_pro/20.2/hld/host/linux64/bin:${home}/intelFPGA/18.1/qprogrammer/bin
 ENV OCL_PATH=/opt/altera/aocl-pro-rte/aclrte-linux64
 ENV QUARTUS_ROOTDIR=/opt/altera/aocl-pro-rte/aclrte-linux64
 
