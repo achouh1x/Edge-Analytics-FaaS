@@ -39,16 +39,15 @@ ENV INTEL_CVSDK_DIR=/opt/intel/openvino
 ENV InferenceEngine_DIR=${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/share
 ENV IE_PLUGINS_PATH=${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/lib/intel64
 ENV ngraph_DIR=${INTEL_OPENVINO_DIR}/deployment_tools/ngraph/
-ENV LD_LIBRARY_PATH=/opt/intel/opencl:${INTEL_OPENVINO_DIR}/inference_engine/external/gna/lib:${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/external/mkltiny_lnx/lib:$INTEL_OPENVINO_DIR/deployment_tools/ngraph:${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/external/omp/lib:${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/external/tbb/lib:${IE_PLUGINS_PATH}:${LD_LIBRARY_PATH}
+ENV LD_LIBRARY_PATH=/opt/intel/opencl:${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/external/gna/lib:${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/external/mkltiny_lnx/lib:$INTEL_OPENVINO_DIR/deployment_tools/ngraph:${INTEL_OPENVINO_DIR}/deployment_tools/inference_engine/external/tbb/lib:${IE_PLUGINS_PATH}:${LD_LIBRARY_PATH}
 ENV OpenCV_DIR=${INTEL_OPENVINO_DIR}/opencv/share/OpenCV
 ENV LD_LIBRARY_PATH=${INTEL_OPENVINO_DIR}/opencv/lib:${INTEL_OPENVINO_DIR}/opencv/share/OpenCV/3rdparty/lib:${LD_LIBRARY_PATH}
 
 ENV AOCL_BOARD_PACKAGE_ROOT=${INTEL_OPENVINO_DIR}/bitstreams/a10_vision_design_sg2_bitstreams/BSP/a10_1150_sg2
 ENV IOCL_BOARD_PACKAGE_ROOT=${INTEL_OPENVINO_DIR}/bitstreams/a10_vision_design_sg2_bitstreams/BSP/a10_1150_sg2
-#ENV QUARTUS_DIR=/home/ieisw/intelFPGA/18.1/qprogrammer
 ENV INTELFPGAOCLSDKROOT=/opt/altera/aocl-pro-rte/aclrte-linux64
 ENV ALTERAOCLSDKROOT=/opt/altera/aocl-pro-rte/aclrte-linux64
-ENV PATH=$PATH:/opt/altera/aocl-pro-rte/aclrte-linux64/bin:/opt/altera/aocl-pro-rte/aclrte-linux64/host/linux64/bin:/home/ieisw/intelFPGA/18.1/qprogrammer/bin
+ENV PATH=$PATH:/opt/altera/aocl-pro-rte/aclrte-linux64/bin:/opt/altera/aocl-pro-rte/aclrte-linux64/host/linux64/bin:${HOME}/intelFPGA/20.2/hld/bin:/root/intelFPGA_pro/20.2/hld/host/linux64/bin
 ENV OCL_PATH=/opt/altera/aocl-pro-rte/aclrte-linux64
 ENV QUARTUS_ROOTDIR=/opt/altera/aocl-pro-rte/aclrte-linux64
 
@@ -57,7 +56,7 @@ ENV DLA_AOCX=${INTEL_OPENVINO_DIR}/bitstreams/a10_vision_design_sg2_bitstreams/2
 ENV PATH=/opt/altera/aocl-pro-rte/aclrte-linux64/bin:$PATH
 ENV LD_LIBRARY_PATH=/opt/intel/openvino/bitstreams/a10_vision_design_sg2_bitstreams/BSP/a10_1150_sg2/linux64/lib:$LD_LIBRARY_PATH
 ENV LD_LIBRARY_PATH=/opt/altera/aocl-pro-rte/aclrte-linux64/host/linux64/lib:$LD_LIBRARY_PATH
-ENV LD_LIBRARY_PATH=/opt/intel/openvino_2020.2.120/deployment_tools/ngraph/lib:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH=${INTEL_OPENVINO_DIR}/deployment_tools/ngraph/lib:/root/intelFPGA_pro/20.2/hld/host/linux64/lib:/root/intelFPGA_pro/20.2/hld/linux64/lib:$LD_LIBRARY_PATH
 ENV PATH /opt/cmake/bin:$PATH
 
 ENV LANG en_US.UTF-8
@@ -66,28 +65,27 @@ ENV LC_ALL C
 ARG DEVICE=VAD-F_FP32
 ARG ONNXRUNTIME_REPO=https://github.com/microsoft/onnxruntime
 ARG ONNXRUNTIME_BRANCH=master
-#openvino-ep-2020.2-ci
 
-COPY l_openvino_*.tgz .
+COPY l_openvino_toolkit_fpga*.tgz .
 
 RUN apt-get update && \
-    apt-get -y install python3.5 python3-pip zip x11-apps lsb-core wget cpio sudo libboost-python-dev libpng-dev zlib1g-dev git libnuma1 ocl-icd-libopencl1 clinfo libboost-filesystem1.58.0 libboost-thread1.58.0 protobuf-compiler libprotoc-dev autoconf automake libgtk-3-dev libtool udev vim locales && pip3 install numpy==1.18.4 networkx opencv-python pytest && \
+    apt-get -y install python3.5 python3-pip zip x11-apps lsb-core wget cpio sudo libboost-python-dev libpng-dev zlib1g-dev git libnuma1 ocl-icd-libopencl1 clinfo libboost-filesystem1.58.0 libboost-thread1.58.0 protobuf-compiler libprotoc-dev autoconf automake libgtk-3-dev libtool udev vim locales && pip3 install numpy==1.18.4 networkx pytest && \
     locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8 
 
 RUN mkdir -p /opt/cmake/bin && \
     wget https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2-Linux-x86_64.tar.gz && \
     tar -xf cmake-3.13.2-Linux-x86_64.tar.gz --strip 1 -C /opt/cmake && rm -rf /cmake-3.13.2-Linux-x86_64.tar.gz 
 
-RUN tar -xzf l_openvino_toolkit*.tgz && \
-    rm -rf l_openvino_toolkit*.tgz && \
-    cd l_openvino_toolkit* && \
+RUN tar -xzf l_openvino_toolkit_fpga*.tgz && \
+    rm -rf l_openvino_toolkit_fpga*.tgz && \
+    cd l_openvino_toolkit_fpga* && \
     sed -i "s/$pattern/$replacement/" silent.cfg && \
     sed -i 's/decline/accept/g' silent.cfg && \
     ./install.sh -s silent.cfg && \
     ./install_openvino_dependencies.sh && \
     cd - && \
-    rm -rf l_openvino_toolkit* && \
-    cd /opt/intel/openvino/install_dependencies && sudo ./_install_all_dependencies.sh && sudo dpkg -i *.deb 
+    rm -rf l_openvino_toolkit_fpga* && \
+    cd /opt/intel/openvino/install_dependencies && sudo ./install_openvino_dependencies.sh  && sudo dpkg -i *.deb 
 
 RUN git clone --recursive -b $ONNXRUNTIME_BRANCH $ONNXRUNTIME_REPO /onnxruntime && \
     cd /onnxruntime/cmake/external/onnx && python3 setup.py install && \
